@@ -1,0 +1,6 @@
+@Espeto_HostAddress = http://localhost:5186
+
+GET {{Espeto_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financeiro - Lucro e Prejuízo</title>
+    <link rel="stylesheet" href="./fin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="topo">
+        <div class="logo">Espetim da 5ª Série</div>
+        <nav>
+            <a href="../comanda/index.html">Pedido</a>
+            <a href="../produto/produtos.html">Produtos</a>
+            <a href="../cliente/clientes.html">Clientes</a>
+            <a href="index.html" class="active">Financeiro</a>
+        </nav>
+        <div class="user">Financeiro</div>
+    </header>
+
+    <div class="container">
+        
+        <div class="area-filtros">
+            <h2>Relatório Financeiro</h2>
+            <div class="controles-data">
+                <div class="grupo-input">
+                    <label>Data Inicial:</label>
+                    <input type="date" id="dataInicio" class="input-data">
+                </div>
+                <div class="grupo-input">
+                    <label>Data Final:</label>
+                    <input type="date" id="dataFim" class="input-data">
+                </div>
+                <button onclick="gerarRelatorio()" class="btn-filtrar">Filtrar Resultados</button>
+            </div>
+        </div>
+
+        <div class="dashboard-cards">
+            <div class="card card-azul">
+                <h3>Faturamento Bruto</h3>
+                <p class="valor" id="txtFaturamento">R$ 0,00</p>
+                <small>Total vendido no período</small>
+            </div>
+
+            <div class="card card-vermelho">
+                <h3>Custo / Investimento</h3>
+                <p class="valor" id="txtCusto">R$ 0,00</p>
+                <small>Gasto para produzir o que vendeu</small>
+            </div>
+
+            <div class="card card-verde">
+                <h3>Lucro Líquido</h3>
+                <p class="valor" id="txtLucro">R$ 0,00</p>
+                <small>O que sobrou no bolso</small>
+            </div>
+        </div>
+
+        <div class="tabela-box">
+            <h3>Detalhamento por Produto Vendido</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Qtd. Vendida</th>
+                        <th>Preço Médio Venda</th>
+                        <th>Custo Unit.</th>
+                        <th>Lucro Total</th>
+                        <th>Margem</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaFinanceira">
+                    </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script src="./fin.js"></script>
+</body>
+</html>
