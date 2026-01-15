@@ -412,15 +412,25 @@ async function pesquisarCliente(termo) {
     }
 }
 function imprimirComanda() {
-    // 1. (Opcional) Verifica se tem itens antes de imprimir
-    // Se quiser que imprima mesmo vazio, pode apagar esse 'if'
-    const totalTexto = document.getElementById('valor-total').innerText; // Ajuste o ID se precisar
-    if (totalTexto === "R$ 0,00") {
+    // Pega o elemento correto pelo ID que está no seu HTML (pedidoTotal)
+    const elementoTotal = document.getElementById('pedidoTotal');
+    
+    // Proteção: Se por acaso não achar o elemento, imprime mesmo assim para não travar
+    if (!elementoTotal) {
+        console.warn("Elemento de total não encontrado, imprimindo direto...");
+        window.print();
+        return;
+    }
+
+    const totalTexto = elementoTotal.innerText;
+
+    // Se o total for 0,00, avisa e não imprime
+    if (totalTexto === "0,00" || totalTexto === "R$ 0,00") {
         alert("O pedido está vazio! Adicione itens antes de imprimir.");
         return;
     }
 
-    // 2. Manda o navegador imprimir
+    // Manda imprimir
     window.print();
 }
 
