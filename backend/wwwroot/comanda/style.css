@@ -507,89 +507,74 @@ button {
 /* ==================================================
    IMPRESSÃO TÉRMICA 58MM - AJUSTE FINAL
    ================================================== */
+/* ==================================================
+   IMPRESSÃO TÉRMICA 58MM - AJUSTE ANTI-CORTE
+   ================================================== */
 @media print {
-    /* 1. CONFIGURA A PÁGINA PARA 58MM EXATOS */
+    /* 1. CONFIGURAÇÃO BÁSICA */
     @page {
         margin: 0;
-        size: 58mm auto; /* Força o navegador a entender que o papel é estreito */
+        size: 58mm auto;
     }
 
-    /* 2. Oculta tudo que não importa */
+    /* 2. Oculta o resto do site */
     body * {
         visibility: hidden;
         height: 0;
         overflow: hidden;
     }
 
-    /* 3. Mostra o card do pedido */
+    /* 3. Mostra o pedido */
     .pedido-info, .pedido-info * {
         visibility: visible;
         height: auto;
     }
 
-    /* 4. AJUSTE DE LARGURA E QUALIDADE (O PULO DO GATO) */
+    /* 4. O GRANDE TRUQUE: ZOOM E LARGURA REDUZIDA */
     .pedido-info {
         position: absolute;
         left: 0;
         top: 0;
         
-        /* Força a largura para 52mm (deixa uma margem de segurança) */
+        /* Reduzi de 52mm para 45mm (Margem de segurança agressiva) */
         width: 100% !important;
-        max-width: 52mm !important; 
+        max-width: 45mm !important; 
         
+        /* Diminui tudo em 10% para garantir que caiba */
+        zoom: 0.9; 
+
         margin: 0;
-        padding: 0 2px; /* Margem mínima nas laterais */
-        box-sizing: border-box; /* Garante que o padding não estoure a largura */
-        
-        /* Limpeza visual */
+        padding: 0;
         box-shadow: none !important;
         border: none !important;
-        background: white !important;
+        display: block;
+        background: white;
     }
 
-    /* 5. TIPOGRAFIA FORTE (PARA FICAR ESCURO E LEGÍVEL) */
+    /* 5. TEXTO FORTE E PRETO */
     .pedido-info h3, 
     .pedido-info p, 
-    .pedido-info span, 
     .pedido-info strong,
     .pedido-info div {
-        color: #000000 !important; /* Preto Absoluto */
-        font-family: Arial, Helvetica, sans-serif !important; /* Fonte simples imprime melhor */
-        font-weight: bold !important; /* Negrito ajuda a impressora térmica */
-        text-shadow: none !important; /* Tira sombras que causam borrões */
+        color: #000000 !important; 
+        font-family: Arial, Helvetica, sans-serif !important; 
+        font-weight: 900 !important; /* Negrito extra forte */
     }
 
-    /* 6. TAMANHOS DE FONTE (Reduzidos para caber) */
-    .pedido-info h3 {
-        font-size: 14px !important; /* Título um pouco maior */
-        margin-bottom: 5px;
-        text-align: center;
-        text-transform: uppercase;
-    }
-
-    .pedido-info p {
-        font-size: 11px !important; /* Texto normal menor */
-        line-height: 1.2;
-        margin: 2px 0;
-    }
-
-    /* 7. AJUSTE DO TOTAL (Onde estava cortando) */
+    /* 6. CORREÇÃO ESPECÍFICA DO PREÇO TOTAL */
     .pedido-info .total {
         font-size: 14px !important;
-        border-top: 2px dashed #000; /* Linha preta grossa */
+        border-top: 2px dashed #000; 
         margin-top: 5px;
         padding-top: 5px;
-        text-align: right;
-        display: block; /* Garante que fique na linha de baixo se precisar */
-    }
-    
-    /* Garante que textos longos quebrem a linha em vez de cortar */
-    .itens-pedido p {
-        white-space: normal !important;
-        word-wrap: break-word !important;
+        text-align: right; /* Alinha à direita */
+        
+        /* O PULO DO GATO PARA O PREÇO: */
+        margin-right: 5px !important; /* Empurra o preço para longe da borda direita */
+        white-space: nowrap; /* Proíbe quebrar a linha no meio do número */
     }
 
-    /* Remove elementos extras */
+    /* Esconde botões */
     .btn-novo, .acoes, .filtros-categoria, .adicionar-itens {
         display: none !important;
     }
