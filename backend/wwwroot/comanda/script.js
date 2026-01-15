@@ -94,7 +94,7 @@ async function criarPedido() {
 /* ===== 2. LISTAR PEDIDOS (ORDEM CRESCENTE) ===== */
 async function renderPedidos() {
     const lista = document.getElementById('listaPedidos');
-    lista.innerHTML = '<p style="color:white; padding:10px;">Carregando...</p>';
+    //lista.innerHTML = '<p style="color:white; padding:10px;">Carregando...</p>';
 
     try {
         const response = await fetch(`${API_URL}/pedidos`);
@@ -440,14 +440,14 @@ function imprimirComanda() {
 setInterval(() => {
     // Chama a função que busca os pedidos no banco
     // ATENÇÃO: Verifique se o nome da sua função é 'carregarPedidos' ou 'listarPedidos'
-    if (typeof carregarPedidos === "function") {
-        carregarPedidos(); 
+    if (typeof renderPedidos === "function") {
+        renderPedidos(); 
     } else {
         // Se você não souber o nome da função, use o recarregamento da página (mais bruto)
         // Mas cuidado: isso pode atrapalhar se você estiver digitando algo no notebook
         // location.reload(); 
     }
-}, 5000);
+}, 15000);
 // INICIALIZAÇÃO
 document.addEventListener("DOMContentLoaded", () => {
     carregarProdutosNoSelect();
