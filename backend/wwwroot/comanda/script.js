@@ -411,6 +411,18 @@ async function pesquisarCliente(termo) {
         console.error("Erro na busca:", error);
     }
 }
+function imprimirComanda() {
+    // 1. (Opcional) Verifica se tem itens antes de imprimir
+    // Se quiser que imprima mesmo vazio, pode apagar esse 'if'
+    const totalTexto = document.getElementById('valor-total').innerText; // Ajuste o ID se precisar
+    if (totalTexto === "R$ 0,00") {
+        alert("O pedido está vazio! Adicione itens antes de imprimir.");
+        return;
+    }
+
+    // 2. Manda o navegador imprimir
+    window.print();
+}
 
 // INICIALIZAÇÃO
 document.addEventListener("DOMContentLoaded", () => {

@@ -504,3 +504,46 @@ button {
         width: 100% !important;
     }
 }
+/* ==================================================
+   IMPRESSÃO TÉRMICA (Focada na classe .pedido-info)
+   ================================================== */
+@media print {
+    /* 1. Oculta TUDO que existe na tela */
+    body * {
+        visibility: hidden;
+        height: 0; /* Ajuda a não gastar papel em branco */
+    }
+
+    /* 2. Torna visível APENAS o card do pedido */
+    .pedido-info, .pedido-info * {
+        visibility: visible;
+        height: auto;
+    }
+
+    /* 3. Posiciona o card no topo absoluto do papel */
+    .pedido-info {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%; /* Ocupa a largura total do papel (58mm ou 80mm) */
+        margin: 0;
+        padding: 5px; /* Um pequeno respiro nas bordas */
+        
+        /* Remove sombras e bordas para economizar tinta e ficar limpo */
+        box-shadow: none !important; 
+        border: none !important;
+        background: white !important;
+    }
+
+    /* 4. Ajustes de Fonte para Impressora Térmica */
+    .pedido-info h3, .pedido-info p, .pedido-info .total {
+        font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada (tipo cupom) */
+        color: black !important; /* Força preto puro */
+    }
+
+    /* 5. Garante que a lista de itens apareça completa */
+    .itens-pedido {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+}
