@@ -433,7 +433,21 @@ function imprimirComanda() {
     // Manda imprimir
     window.print();
 }
-
+/* ==================================================
+   ATUALIZAÇÃO AUTOMÁTICA (AUTO-REFRESH)
+   ================================================== */
+// Executa a cada 5 segundos (5000 milissegundos)
+setInterval(() => {
+    // Chama a função que busca os pedidos no banco
+    // ATENÇÃO: Verifique se o nome da sua função é 'carregarPedidos' ou 'listarPedidos'
+    if (typeof carregarPedidos === "function") {
+        carregarPedidos(); 
+    } else {
+        // Se você não souber o nome da função, use o recarregamento da página (mais bruto)
+        // Mas cuidado: isso pode atrapalhar se você estiver digitando algo no notebook
+        // location.reload(); 
+    }
+}, 5000);
 // INICIALIZAÇÃO
 document.addEventListener("DOMContentLoaded", () => {
     carregarProdutosNoSelect();

@@ -423,92 +423,9 @@ button {
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,.06);
 }
-/* =========================================
-   LAYOUT MOBILE: PILHA VERTICAL (UM EMBAIXO DO OUTRO)
-   Substitua o código anterior por este no final do arquivo.
-   ========================================= */
-@media (max-width: 768px) {
 
-    /* 1. OBRIGA OS DOIS CARDS A FICAREM UM EMBAIXO DO OUTRO */
-    .linha-topo {
-        display: flex !important;
-        flex-direction: column !important; /* Isso é o segredo da pilha vertical */
-        width: 100% !important;
-        gap: 15px !important; /* Espaço entre o card de cima e o de baixo */
-    }
-
-    /* 2. FORÇA OS CARDS A OCUPAREM A TELA TODA */
-    .pedido-info, 
-    .adicionar-itens {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        box-sizing: border-box; /* Garante que padding não estoure a tela */
-    }
-
-    /* 3. BOTÕES DE CATEGORIA (AJUSTE PARA NÃO VAZAR) */
-    .filtros-categoria {
-        display: flex;
-        overflow-x: auto; /* Rolagem lateral */
-        gap: 10px;
-        padding-bottom: 5px;
-    }
-
-    /* 4. ÁREA DE BOTÕES (NOVO PEDIDO, COMANDA, PAGAR) */
-    .acoes {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important; /* Divide em 2 */
-        gap: 10px !important;
-        width: 100% !important;
-        margin-top: 10px !important;
-    }
-
-    /* Botão Novo Pedido: Fica em cima, grandão */
-    .btn-novo {
-        grid-column: 1 / -1 !important; /* Ocupa as 2 colunas */
-        width: 100% !important;
-        padding: 15px !important;
-        font-size: 1.1rem !important;
-        order: 1; /* Força ele a ser o primeiro */
-    }
-
-    /* Botões Comanda e Pagar: Ficam embaixo, menores */
-    .btn-comanda, .btn-pagar {
-        width: 100% !important;
-        font-size: 0.85rem !important;
-        padding: 10px !important;
-        height: auto !important;
-        order: 2; /* Ficam depois do Novo Pedido */
-    }
-
-    /* 5. INPUTS E SELECTS OCUPANDO TUDO */
-    .controles-pedido {
-        display: flex;
-        flex-direction: column; /* Um embaixo do outro */
-        gap: 10px;
-    }
-    
-    #selectProduto, #qtdPedido, .btn-add {
-        width: 100% !important;
-        height: 45px;
-    }
-
-    /* 6. CORREÇÃO DA LISTA DE PEDIDOS EM ABERTO */
-    .pedidos-grid {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .pedido-card {
-        width: 100% !important;
-    }
-}
 /* ==================================================
    IMPRESSÃO TÉRMICA 58MM - AJUSTE FINAL
-   ================================================== */
-/* ==================================================
-   IMPRESSÃO TÉRMICA 58MM - AJUSTE ANTI-CORTE
    ================================================== */
 @media print {
     /* 1. CONFIGURAÇÃO BÁSICA */
@@ -577,5 +494,98 @@ button {
     /* Esconde botões */
     .btn-novo, .acoes, .filtros-categoria, .adicionar-itens {
         display: none !important;
+    }
+}
+/* ==========================================================
+   LAYOUT MOBILE - VERSÃO "ANTI-SOBREPOSIÇÃO"
+   (Cole no final do style.css limpo de outros medias)
+   ========================================================== */
+@media (max-width: 768px) {
+
+    /* 1. DESTRAVAR AS ALTURAS (O Segredo para não encavalar) */
+    body, html {
+        height: auto !important;
+        overflow-x: hidden; /* Evita rolagem lateral */
+    }
+
+    /* O container que segura o card deve crescer */
+    .linha-topo {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        height: auto !important; /* IMPORTANTE */
+        gap: 20px !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* O Card onde estão os inputs deve crescer */
+    .adicionar-itens {
+        width: 100% !important;
+        height: auto !important; /* IMPORTANTE */
+        min-height: 400px !important; /* Garante altura mínima para caber os inputs */
+        display: block !important;
+        padding-bottom: 30px !important; /* Espaço extra no fundo do card */
+    }
+
+    /* 2. INPUTS GIGANTES */
+    .controles-pedido {
+        display: flex;
+        flex-direction: column;
+        gap: 15px !important;
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    #selectProduto, 
+    #qtdPedido {
+        width: 100% !important;
+        height: 60px !important;
+        font-size: 1.2rem !important;
+        padding: 10px;
+        background: #fff;
+        border: 2px solid #ccc;
+        box-sizing: border-box; /* Garante que a borda não aumente a largura */
+    }
+
+    .btn-add {
+        width: 100% !important;
+        height: 65px !important;
+        font-size: 1.3rem !important;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-bottom: 20px !important; /* Empurra tudo que vier depois */
+    }
+
+    /* 3. BOTÕES DE AÇÃO (Separados e Seguros) */
+    .acoes {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+        width: 100% !important;
+        margin-top: 40px !important; /* Margem de segurança GIGANTE */
+        position: relative !important; /* Garante que obedeça o fluxo */
+        clear: both !important; /* Limpa flutuações */
+    }
+
+    .btn-novo {
+        grid-column: 1 / -1 !important;
+        padding: 15px !important;
+        font-size: 1.1rem !important;
+        order: 1;
+    }
+
+    .btn-comanda, .btn-pagar {
+        padding: 15px !important;
+        order: 2;
+    }
+    
+    /* Demais ajustes */
+    .pedido-info {
+        width: 100% !important;
+    }
+    .filtros-categoria {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 10px;
     }
 }
