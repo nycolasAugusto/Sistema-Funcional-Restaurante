@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gestão de Clientes</title>
+    <link rel="stylesheet" href="clientes.css">
+</head>
+
+<body>
+    <header class="topo">
+        <div class="logo">Espetim da 5ª Série</div>
+        <nav>
+            <a href="../comanda/index.html">Pedido</a>
+            <a href="../produto/produtos.html">Produtos</a>
+            <a href="clientes.html" class="active">Clientes</a>
+            <a href="../financeiro/fin.html">Financeiro</a>
+        </nav>
+        <div class="user">Clientes</div>
+    </header>
+    <div class="container-principal">
+
+        <h1>Clientes</h1>
+        
+        <div class="controles">
+            <input type="text" id="campoBusca" placeholder="Pesquisar por Nome ou Telefone..." oninput="filtrarTabela()">
+            
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Endereço</th>
+                    <th style="text-align: center;">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaClientes"></tbody>
+        </table>
+        
+        <div id="modalEditar" class="modal">
+            <div class="modal-content">
+                <h3>Editar Cliente</h3>
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Nome</label>
+                    <input type="text" id="editNome">
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="text" id="editTelefone">
+                </div>
+                <div class="form-group">
+                <label>Endereço</label>
+                <input type="text" id="editEndereco">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="fecharModais()" style="background: gray;">Cancelar</button>
+                <button onclick="salvarEdicao()" style="background: green;">Salvar</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="modalHistorico" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <h3>Histórico de Pedidos: <span id="nomeClienteHist"></span></h3>
+            <div id="listaHistorico" class="lista-historico">
+            </div>
+            <div style="margin-top: 15px; text-align: right;">
+                <button onclick="fecharModais()" style="background: gray;">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    <script src="clientes.js"></script>
+</body>
+
+</html>

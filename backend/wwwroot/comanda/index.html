@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PDV - Pedidos</title>
+    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+
+    <!-- TOPO -->
+    <header class="topo">
+        <div class="logo">Espetim da 5ª Série</div>
+        <nav>
+           
+          
+        </nav>
+
+        <div class="user">
+            <a href="../home/home.html" class="botaoPraSair">Sair</a>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <main class="container">
+
+        <!-- LINHA SUPERIOR -->
+        <section class="linha-topo">
+
+            <!-- PEDIDO SELECIONADO -->
+            <div class="card pedido-info">
+                <h3>Pedido #<span id="pedidoNumero">-</span></h3>
+                <p>Cliente: <strong id="pedidoCliente">-</strong></p>
+
+                <div class="itens-pedido" id="listaItens">
+                    <p class="vazio">Nenhum item adicionado</p>
+                </div>
+
+                <div class="total">
+                    Total: R$ <span id="pedidoTotal">0,00</span>
+                </div>
+            </div>
+
+            <!-- ADICIONAR ITENS -->
+            <div class="card adicionar-itens">
+                <h3>Adicionar itens – Pedido #<span id="pedidoAddNumero">-</span></h3>
+
+                <div class="form-itens">
+
+                    <div class="filtros-categoria">
+                        <button class="btn-filtro" onclick="filtrarProdutos('ESPETINS', this)">Espetins</button>
+                        <button class="btn-filtro" onclick="filtrarProdutos('ESPETINS_ESP', this)">Espetins
+                            Especiais</button>
+                        <button class="btn-filtro" onclick="filtrarProdutos('SANDUICHES', this)">Sanduíches</button>
+                        <button class="btn-filtro" onclick="filtrarProdutos('SOBREMESAS', this)">Sobremesas</button>
+                        <button class="btn-filtro" onclick="filtrarProdutos('BEBIDAS', this)">Bebidas</button>
+                        <button class="btn-filtro" onclick="filtrarProdutos('DRINKS', this)">Drinks/Doses</button>
+                    </div>
+
+                    <div class="controles-pedido">
+                        <select id="selectProduto" class="input-padrao">
+                            <option value="">Selecione um produto</option>
+                        </select>
+
+                        <input type="number" id="qtdPedido" placeholder="Qtd" class="input-padrao" min="1">
+
+                        <button onclick="adicionarAoPedido()" class="btn-add">Adicionar</button>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </section>
+
+        <!-- AÇÕES -->
+        <section class="acoes">
+            <button class="btn-comanda">Comanda</button>
+            <button class="btn-pagar" onclick="abrirModalPagamento()">Pagar</button>
+            <button class="btn-novo" onclick="abrirModal()">Novo Pedido</button>
+        </section>
+
+        <!-- PEDIDOS EM ABERTO -->
+        <section>
+            <h3>Pedidos em Aberto</h3>
+            <div class="pedidos-grid" id="listaPedidos"></div>
+        </section>
+
+    </main>
+
+    <!-- MODAL NOVO PEDIDO -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3>Novo Pedido</h3>
+
+            <input id="clienteCelular" placeholder="Digite o Celular ou Nome..." list="sugestoesClientes"
+                oninput="pesquisarCliente(this.value)" autocomplete="off">
+
+            <datalist id="sugestoesClientes"></datalist>
+
+            <input id="clienteNome" placeholder="Nome do cliente">
+
+
+            <div class="modal-botoes">
+                <button onclick="fecharModal()">Cancelar</button>
+                <button class="btn-novo" onclick="criarPedido()">Criar</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal" id="modalPagamento">
+        <div class="modal-content" style="text-align: center;">
+            <h3>Finalizar Pedido</h3>
+            <p>Total a Pagar: <strong style="font-size: 1.5em; color: green;">R$ <span
+                        id="valorPagarModal">0,00</span></strong></p>
+
+            <label style="display:block; margin: 15px 0 5px; text-align:left;">Forma de Pagamento:</label>
+            <select id="selectPagamento" style="width: 100%; padding: 10px; margin-bottom: 20px;">
+                <option value="">Selecione...</option>
+                <option value="PIX">Pix</option>
+                <option value="DINHEIRO">Dinheiro</option>
+                <option value="DEBITO">Cartão de Débito</option>
+                <option value="CREDITO">Cartão de Crédito</option>
+            </select>
+
+            <div class="modal-botoes">
+                <button onclick="fecharModalPagamento()">Cancelar</button>
+                <button class="btn-pagar" onclick="confirmarPagamento()">CONFIRMAR PAGAMENTO</button>
+            </div>
+        </div>
+    </div>
+    <script src="./script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,81 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\cliente\\clientes.css",
+      "PackagePath": "staticwebassets\\cliente\\clientes.css"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\cliente\\clientes.html",
+      "PackagePath": "staticwebassets\\cliente\\clientes.html"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\cliente\\clientes.js",
+      "PackagePath": "staticwebassets\\cliente\\clientes.js"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\comanda\\index.html",
+      "PackagePath": "staticwebassets\\comanda\\index.html"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\comanda\\script.js",
+      "PackagePath": "staticwebassets\\comanda\\script.js"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\comanda\\style.css",
+      "PackagePath": "staticwebassets\\comanda\\style.css"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\financeiro\\fin.css",
+      "PackagePath": "staticwebassets\\financeiro\\fin.css"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\financeiro\\fin.html",
+      "PackagePath": "staticwebassets\\financeiro\\fin.html"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\financeiro\\fin.js",
+      "PackagePath": "staticwebassets\\financeiro\\fin.js"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\home\\home.css",
+      "PackagePath": "staticwebassets\\home\\home.css"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\home\\home.html",
+      "PackagePath": "staticwebassets\\home\\home.html"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\home\\home.js",
+      "PackagePath": "staticwebassets\\home\\home.js"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\produto\\produtos.css",
+      "PackagePath": "staticwebassets\\produto\\produtos.css"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\produto\\produtos.html",
+      "PackagePath": "staticwebassets\\produto\\produtos.html"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\produto\\produtos.js",
+      "PackagePath": "staticwebassets\\produto\\produtos.js"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.Espeto.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.Espeto.props",
+      "PackagePath": "build\\Espeto.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.Espeto.props",
+      "PackagePath": "buildMultiTargeting\\Espeto.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.Espeto.props",
+      "PackagePath": "buildTransitive\\Espeto.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

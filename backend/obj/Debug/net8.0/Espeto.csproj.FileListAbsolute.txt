@@ -126,3 +126,5 @@ C:\Users\nycol\Desktop\Espeto\backend\obj\Debug\net8.0\refint\Espeto.dll
 C:\Users\nycol\Desktop\Espeto\backend\obj\Debug\net8.0\Espeto.pdb
 C:\Users\nycol\Desktop\Espeto\backend\obj\Debug\net8.0\Espeto.genruntimeconfig.cache
 C:\Users\nycol\Desktop\Espeto\backend\obj\Debug\net8.0\ref\Espeto.dll
+C:\Users\nycol\Desktop\Espeto\backend\bin\Debug\net8.0\Espeto.staticwebassets.runtime.json
+C:\Users\nycol\Desktop\Espeto\backend\obj\Debug\net8.0\Espeto.sourcelink.json
