@@ -508,42 +508,42 @@ button {
    IMPRESSÃO TÉRMICA (Focada na classe .pedido-info)
    ================================================== */
 @media print {
-    /* 1. Oculta TUDO que existe na tela */
-    body * {
-        visibility: hidden;
-        height: 0; /* Ajuda a não gastar papel em branco */
+    /* 1. CONFIGURAÇÃO DO PAPEL (O SEGREDO DO CORTE) */
+    @page {
+        margin: 0;        /* Tira margem do navegador */
+        size: auto;       /* Deixa o tamanho automático */
     }
 
-    /* 2. Torna visível APENAS o card do pedido */
+    /* 2. Oculta tudo */
+    body * {
+        visibility: hidden;
+        height: 0;
+        overflow: hidden;
+    }
+
+    /* 3. Mostra só o pedido */
     .pedido-info, .pedido-info * {
         visibility: visible;
         height: auto;
     }
 
-    /* 3. Posiciona o card no topo absoluto do papel */
+    /* 4. Posicionamento e Limpeza */
     .pedido-info {
         position: absolute;
         left: 0;
         top: 0;
-        width: 100%; /* Ocupa a largura total do papel (58mm ou 80mm) */
+        width: 100%;
         margin: 0;
-        padding: 5px; /* Um pequeno respiro nas bordas */
-        
-        /* Remove sombras e bordas para economizar tinta e ficar limpo */
-        box-shadow: none !important; 
+        padding: 0;
+        box-shadow: none !important;
         border: none !important;
-        background: white !important;
+        /* IMPORTANTE: Corta o excesso de papel em branco */
+        display: block;
+        page-break-after: avoid; 
     }
-
-    /* 4. Ajustes de Fonte para Impressora Térmica */
-    .pedido-info h3, .pedido-info p, .pedido-info .total {
-        font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada (tipo cupom) */
-        color: black !important; /* Força preto puro */
-    }
-
-    /* 5. Garante que a lista de itens apareça completa */
-    .itens-pedido {
-        max-height: none !important;
-        overflow: visible !important;
+    
+    /* Esconde elementos internos desnecessários */
+    .btn-novo, .acoes, .filtros-categoria, .adicionar-itens {
+        display: none !important;
     }
 }
