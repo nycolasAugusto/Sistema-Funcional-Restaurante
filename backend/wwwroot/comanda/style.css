@@ -505,44 +505,91 @@ button {
     }
 }
 /* ==================================================
-   IMPRESSÃO TÉRMICA (Focada na classe .pedido-info)
+   IMPRESSÃO TÉRMICA 58MM - AJUSTE FINAL
    ================================================== */
 @media print {
-    /* 1. CONFIGURAÇÃO DO PAPEL (O SEGREDO DO CORTE) */
+    /* 1. CONFIGURA A PÁGINA PARA 58MM EXATOS */
     @page {
-        margin: 0;        /* Tira margem do navegador */
-        size: auto;       /* Deixa o tamanho automático */
+        margin: 0;
+        size: 58mm auto; /* Força o navegador a entender que o papel é estreito */
     }
 
-    /* 2. Oculta tudo */
+    /* 2. Oculta tudo que não importa */
     body * {
         visibility: hidden;
         height: 0;
         overflow: hidden;
     }
 
-    /* 3. Mostra só o pedido */
+    /* 3. Mostra o card do pedido */
     .pedido-info, .pedido-info * {
         visibility: visible;
         height: auto;
     }
 
-    /* 4. Posicionamento e Limpeza */
+    /* 4. AJUSTE DE LARGURA E QUALIDADE (O PULO DO GATO) */
     .pedido-info {
         position: absolute;
         left: 0;
         top: 0;
-        width: 100%;
+        
+        /* Força a largura para 52mm (deixa uma margem de segurança) */
+        width: 100% !important;
+        max-width: 52mm !important; 
+        
         margin: 0;
-        padding: 0;
+        padding: 0 2px; /* Margem mínima nas laterais */
+        box-sizing: border-box; /* Garante que o padding não estoure a largura */
+        
+        /* Limpeza visual */
         box-shadow: none !important;
         border: none !important;
-        /* IMPORTANTE: Corta o excesso de papel em branco */
-        display: block;
-        page-break-after: avoid; 
+        background: white !important;
+    }
+
+    /* 5. TIPOGRAFIA FORTE (PARA FICAR ESCURO E LEGÍVEL) */
+    .pedido-info h3, 
+    .pedido-info p, 
+    .pedido-info span, 
+    .pedido-info strong,
+    .pedido-info div {
+        color: #000000 !important; /* Preto Absoluto */
+        font-family: Arial, Helvetica, sans-serif !important; /* Fonte simples imprime melhor */
+        font-weight: bold !important; /* Negrito ajuda a impressora térmica */
+        text-shadow: none !important; /* Tira sombras que causam borrões */
+    }
+
+    /* 6. TAMANHOS DE FONTE (Reduzidos para caber) */
+    .pedido-info h3 {
+        font-size: 14px !important; /* Título um pouco maior */
+        margin-bottom: 5px;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    .pedido-info p {
+        font-size: 11px !important; /* Texto normal menor */
+        line-height: 1.2;
+        margin: 2px 0;
+    }
+
+    /* 7. AJUSTE DO TOTAL (Onde estava cortando) */
+    .pedido-info .total {
+        font-size: 14px !important;
+        border-top: 2px dashed #000; /* Linha preta grossa */
+        margin-top: 5px;
+        padding-top: 5px;
+        text-align: right;
+        display: block; /* Garante que fique na linha de baixo se precisar */
     }
     
-    /* Esconde elementos internos desnecessários */
+    /* Garante que textos longos quebrem a linha em vez de cortar */
+    .itens-pedido p {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+    }
+
+    /* Remove elementos extras */
     .btn-novo, .acoes, .filtros-categoria, .adicionar-itens {
         display: none !important;
     }
