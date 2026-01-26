@@ -267,7 +267,71 @@ button {
     width: 80px;
     text-align: center;
 }
+/* === BOTÃO EDITAR (Amarelo) === */
+.btn-editar {
+    background-color: #68440b; /* Laranja/Amarelo */
+    color: rgb(207, 85, 85);
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 10px;
+}
+.btn-editar:hover {
+    background-color: #e67e22;
+}
 
+/* === LISTA DENTRO DO MODAL DE EDIÇÃO === */
+.lista-edicao-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 15px 0;
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.item-editar-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.controles-qtd {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-mini {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%; /* Redondo */
+    border: none;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-menos { background-color: #e74c3c; color: white; }
+.btn-mais  { background-color: #2ecc71; color: white; }
+.btn-lixo  { background-color: #333; color: white; margin-left: 10px; border-radius: 4px; width: auto; padding: 0 10px; }
+
+.qtd-display {
+    font-size: 1.2rem;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
+}
 /* Botão Adicionar (+ ou Adicionar) */
 .btn-add {
     height: 100%;

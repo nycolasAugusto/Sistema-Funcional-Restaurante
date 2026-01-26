@@ -259,9 +259,151 @@ async function atualizarPedidoAtivo(id) {
     }
 }
 
-/* ===== 5. CARREGAR SELECT DE PRODUTOS ===== */
+/* ==================================================
+   LÓGICA DO MODAL DE EDIÇÃO (FALTAVA ISSO!)
+   ================================================== */
 
+function abrirModalEditar() {
+    // 1. Verifica se tem um pedido selecionado
+    if (!pedidoAtivo) {
+        alert("Clique em um pedido na lista para editar!");
+        return;
+    }
 
+    console.log("Abrindo edição para o pedido:", pedidoAtivo.id); // Debug no console
+
+    // 2. Preenche o número do pedido no título do modal
+    const elementoTitulo = document.getElementById('tituloEditarPedido');
+    if (elementoTitulo) {
+        elementoTitulo.innerText = pedidoAtivo.id;
+    }
+    
+    // 3. Desenha os itens na tela
+    renderizarItensEdicao();
+    
+    // 4. Mostra o modal (AQUI É QUE A MÁGICA ACONTECE)
+    const modal = document.getElementById('modalEditar');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        alert("Erro: Modal de edição não encontrado no HTML!");
+    }
+}
+
+function fecharModalEditar() {
+    document.getElementById('modalEditar').style.display = 'none';
+}
+
+// Função que desenha a lista com botões + e - dentro do modal
+function renderizarItensEdicao() {
+    const lista = document.getElementById('listaItensEdicao');
+    lista.innerHTML = '';
+
+    // Se não tiver itens, avisa
+    if (!pedidoAtivo || !pedidoAtivo.itens || pedidoAtivo.itens.length === 0) {
+        lista.innerHTML = '<p style="text-align:center; padding:20px;">Este pedido não tem itens.</p>';
+        return;
+    }
+
+    // Desenha cada item com os botões
+    pedidoAtivo.itens.forEach(item => {
+        // Proteção caso o produto venha nulo
+        const nomeProd = item.produto ? item.produto.nome : 'Produto Indefinido';
+        const preco = item.precoUnitarioVenda || 0;
+        
+        lista.innerHTML += `
+            <div class="item-editar-card" style="border-bottom:1px solid #ddd; padding:10px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="flex: 1;">
+                    <strong>${nomeProd}</strong><br>
+                    <small>R$ ${preco.toFixed(2)} un.</small>
+                </div>
+
+                <div class="controles-qtd" style="display:flex; align-items:center; gap:10px;">
+                    <button class="btn-mini btn-menos" style="background:red; color:white; width:30px; height:30px; border:none; border-radius:50%; font-weight:bold; cursor:pointer;" 
+                        onclick="alterarQuantidadeItem(${item.id}, ${item.produtoId}, -1, ${item.quantidade})">-</button>
+                    
+                    <span class="qtd-display" style="font-size:1.2em; font-weight:bold; width:30px; text-align:center;">${item.quantidade}</span>
+                    
+                    <button class="btn-mini btn-mais" style="background:green; color:white; width:30px; height:30px; border:none; border-radius:50%; font-weight:bold; cursor:pointer;" 
+                        onclick="alterarQuantidadeItem(${item.id}, ${item.produtoId}, 1, ${item.quantidade})">+</button>
+
+                    <button class="btn-mini btn-lixo" style="background:#333; color:white; padding:5px 10px; border:none; border-radius:4px; margin-left:10px; cursor:pointer;" 
+                        onclick="removerItemCompleto(${item.id})">🗑️</button>
+                </div>
+            </div>
+        `;
+    });
+}
+
+/* --- AÇÃO DE AUMENTAR OU DIMINUIR QUANTIDADE --- */
+async function alterarQuantidadeItem(idItemPedido, idProduto, delta, qtdAtual) {
+    // Delta é +1 (aumentar) ou -1 (diminuir)
+    
+    // Se for diminuir e a qtd for 1, pergunta se quer apagar
+    if (delta === -1 && qtdAtual === 1) {
+        removerItemCompleto(idItemPedido);
+        return;
+    }
+
+    try {
+        if (delta === 1) {
+            // AUMENTAR: Adiciona +1 do mesmo produto
+            const payload = { produtoId: idProduto, quantidade: 1 };
+            await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/itens`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        } else {
+            // DIMINUIR: Remove o item atual e cria um novo com qtd-1
+            // (Isso é necessário se seu backend não tiver rota de edição direta)
+            
+            // 1. Deleta
+            await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/itens/${idItemPedido}`, { method: 'DELETE' });
+            
+            // 2. Recria com menos
+            const novaQtd = qtdAtual - 1;
+            if (novaQtd > 0) {
+                 await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/itens`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ produtoId: idProduto, quantidade: novaQtd })
+                });
+            }
+        }
+
+        // Atualiza tudo
+        await atualizarPedidoAtivo(pedidoAtivo.id);
+        renderizarItensEdicao(); // Redesenha o modal
+        renderPedidos(); // Atualiza a lista de fundo
+
+    } catch (error) {
+        console.error("Erro ao alterar qtd:", error);
+        alert("Erro ao atualizar item. Verifique o console.");
+    }
+}
+
+/* --- AÇÃO DE REMOVER O ITEM INTEIRO (LIXEIRA) --- */
+async function removerItemCompleto(idItemPedido) {
+    if(!confirm("Remover este item do pedido?")) return;
+
+    try {
+        const res = await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/itens/${idItemPedido}`, {
+            method: 'DELETE'
+        });
+
+        if (res.ok) {
+            await atualizarPedidoAtivo(pedidoAtivo.id);
+            renderizarItensEdicao(); // Atualiza o modal
+            renderPedidos(); // Atualiza a lista principal
+        } else {
+            alert("Erro ao remover. O pedido pode estar pago ou fechado.");
+        }
+    } catch (erro) {
+        console.error(erro);
+        alert("Erro de conexão.");
+    }
+}
 /* ===== 5. CARREGAR PRODUTOS (MODIFICADA) ===== */
 async function carregarProdutosNoSelect() {
     try {
