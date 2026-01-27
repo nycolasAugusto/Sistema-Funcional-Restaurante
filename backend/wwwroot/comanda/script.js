@@ -2,7 +2,7 @@ const API_URL = "/api";
 let pedidoAtivo = null;
 let clienteIdSelecionado = null;
 let todosProdutosCache = []; // Guarda a lista completa vinda do banco
-
+let precoOverride = 0;
 /* ===== MODAL ===== */
 function abrirModal() {
     document.getElementById('modal').style.display = 'flex';
@@ -27,6 +27,17 @@ function abrirModalPagamento() {
 function fecharModalPagamento() {
     document.getElementById('modalPagamento').style.display = 'none';
     document.getElementById('selectPagamento').value = ""; // Limpa a seleção
+}
+
+function definirQtdEPreco(qtd, preco) {
+    // 1. Preenche o campo visualmente
+    document.getElementById('qtdPedido').value = qtd;
+    
+    // 2. Salva o preço (8.00 ou 12.00) na variável global
+    precoOverride = preco; 
+    
+    // 3. Chama a função de adicionar
+    adicionarAoPedido();
 }
 /* ===== 1. CRIAR PEDIDO ===== */   
 async function criarPedido() {
@@ -201,6 +212,7 @@ function renderPedidoDetalhes() {
 }
 
 /* ===== 4. ADICIONAR ITEM AO PEDIDO (CONECTADO À API) ===== */
+/* ===== 4. ADICIONAR ITEM AO PEDIDO (CORRIGIDO) ===== */
 async function adicionarAoPedido() {
     if (!pedidoAtivo) {
         alert("Selecione um pedido primeiro");
@@ -216,10 +228,11 @@ async function adicionarAoPedido() {
         return;
     }
 
-    // --- CORREÇÃO: Usar FETCH para o Back-end (Nada de localStorage!) ---
+    // --- AQUI ESTÁ A CORREÇÃO PRINCIPAL ---
     const payload = {
         produtoId: parseInt(idProduto),
-        quantidade: qtd
+        quantidade: qtd,
+        precoPersonalizado: precoOverride // <--- ENVIA O PREÇO DO CHOPP AQUI
     };
 
     try {
@@ -230,7 +243,6 @@ async function adicionarAoPedido() {
         });
 
         if (res.ok) {
-            // Recarrega TUDO para garantir sincronia com o banco
             await atualizarPedidoAtivo(pedidoAtivo.id);
             await renderPedidos(); 
 
@@ -244,9 +256,11 @@ async function adicionarAoPedido() {
     } catch (error) {
         console.error(error);
         alert("Erro de conexão.");
+    } finally {
+        // ZERA O PREÇO PARA NÃO BUGAR O PRÓXIMO PEDIDO
+        precoOverride = 0; 
     }
 }
-
 // Busca o pedido atualizado do banco para atualizar a lista de itens na hora
 async function atualizarPedidoAtivo(id) {
     const response = await fetch(`${API_URL}/pedidos`);
@@ -620,11 +634,6 @@ function verificarSeEhChopp() {
     }
 }
 
-// Função dos botões amarelos
-function definirQtdEAdicionar(valor) {
-    document.getElementById('qtdPedido').value = valor;
-    adicionarAoPedido();
-}
 
 // INICIALIZAÇÃO
 document.addEventListener("DOMContentLoaded", () => {

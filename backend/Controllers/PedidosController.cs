@@ -2,10 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Espeto.Data;
 using Espeto.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Espeto.Controllers
 {
@@ -70,13 +66,20 @@ namespace Espeto.Controllers
                     ProdutoId = produto.Id,
                     Quantidade = itemDto.Quantidade,
                     
-                    // --- FINANCEIRO ---
-                    PrecoUnitarioVenda = produto.ValorVenda, 
+                    // --- AQUI ESTÁ A MÁGICA DO PREÇO PERSONALIZADO ---
+                    // Se veio preço do botão (ex: 8.00), usa ele. Se não, usa o do cadastro.
+                    // SEGREDO: Se veio preço personalizado, divide pela quantidade para achar o valor do litro correto
+PrecoUnitarioVenda = itemDto.PrecoPersonalizado > 0 
+    ? (itemDto.PrecoPersonalizado / (decimal)itemDto.Quantidade) 
+    : produto.ValorVenda,
+                    
                     CustoUnitario = produto.CustoMedio 
                 };
 
-                // CORREÇÃO: Cast explícito para (decimal) na quantidade
+                // Cálculo Financeiro (Convertendo Double para Decimal)
                 totalPedido += (novoItem.PrecoUnitarioVenda * (decimal)novoItem.Quantidade);
+                
+                // Baixa de Estoque
                 produto.SaldoEstoque -= itemDto.Quantidade;
 
                 pedido.Itens.Add(novoItem);
@@ -114,12 +117,15 @@ namespace Espeto.Controllers
                 ProdutoId = produto.Id,
                 Quantidade = itemDto.Quantidade,
                 
-                // --- FINANCEIRO ---
-                PrecoUnitarioVenda = produto.ValorVenda,
+                // --- MÁGICA DO PREÇO TAMBÉM NO ITEM EXTRA ---
+                PrecoUnitarioVenda = itemDto.PrecoPersonalizado > 0 
+                ? (itemDto.PrecoPersonalizado / (decimal)itemDto.Quantidade) 
+                : produto.ValorVenda,
+                
                 CustoUnitario = produto.CustoMedio 
             };
 
-            // CORREÇÃO: Cast explícito para (decimal)
+            // Atualiza Total
             pedido.ValorTotal += ((decimal)novoItem.Quantidade * novoItem.PrecoUnitarioVenda);
             
             _context.ItensPedido.Add(novoItem); 
@@ -129,6 +135,7 @@ namespace Espeto.Controllers
             return Ok(new { mensagem = "Item adicionado!", novoTotal = pedido.ValorTotal });
         }
 
+        // GET: api/pedidos/cliente/5
         [HttpGet("cliente/{clienteId}")]
         public async Task<ActionResult<IEnumerable<Pedido>>> GetPedidosPorCliente(int clienteId)
         {
@@ -139,6 +146,7 @@ namespace Espeto.Controllers
                 .ToListAsync();
         }
 
+        // PUT: api/pedidos/5/pagar
         [HttpPut("{id}/pagar")]
         public async Task<IActionResult> ConfirmarPagamento(int id, [FromQuery] string metodo)
         {
@@ -163,43 +171,41 @@ namespace Espeto.Controllers
             if (dto.Quantidade <= 0)
                 return BadRequest("A quantidade deve ser maior que zero.");
 
-            // 1. Busca o item e o produto (para mexer no estoque)
+            // 1. Busca o item e o produto
             var item = await _context.ItensPedido
                 .Include(i => i.Produto)
                 .FirstOrDefaultAsync(i => i.Id == itemId && i.PedidoId == pedidoId);
 
             if (item == null) return NotFound("Item não encontrado.");
 
-            // 2. Busca o pedido para validar status e atualizar total
             var pedido = await _context.Pedidos.FindAsync(pedidoId);
             if (pedido.Status == "PAGO" || pedido.Status == "CANCELADO")
                 return BadRequest("Pedido fechado não pode ser alterado.");
 
-            // 3. LÓGICA DE ESTOQUE
-            // CORREÇÃO: Usar double para a diferença
+            // 2. LÓGICA DE ESTOQUE (Aceita Double)
             double diferenca = dto.Quantidade - item.Quantidade;
 
-            if (diferenca > 0) // Aumentando quantidade
+            if (diferenca > 0) // Aumentando quantidade (Consome Estoque)
             {
                 if (item.Produto.SaldoEstoque < diferenca)
                     return BadRequest($"Estoque insuficiente. Só restam {item.Produto.SaldoEstoque}.");
                 
                 item.Produto.SaldoEstoque -= diferenca;
             }
-            else if (diferenca < 0) // Diminuindo quantidade
+            else if (diferenca < 0) // Diminuindo quantidade (Devolve Estoque)
             {
                 item.Produto.SaldoEstoque += Math.Abs(diferenca); 
             }
 
-            // 4. Atualiza o TOTAL do Pedido
-            // CORREÇÃO: Cast explícito para (decimal)
+            // 3. Atualiza o TOTAL do Pedido
+            // Remove o valor antigo
             pedido.ValorTotal -= ((decimal)item.Quantidade * item.PrecoUnitarioVenda);
+            // Adiciona o valor novo (Mantém o preço unitário original, seja ele 8 ou 12)
             pedido.ValorTotal += ((decimal)dto.Quantidade * item.PrecoUnitarioVenda);
 
-            // Garante que não fique negativo por erro de arredondamento
             if (pedido.ValorTotal < 0) pedido.ValorTotal = 0;
 
-            // 5. Atualiza o item
+            // 4. Atualiza o item
             item.Quantidade = dto.Quantidade;
 
             await _context.SaveChangesAsync();
@@ -207,35 +213,31 @@ namespace Espeto.Controllers
             return Ok(new { mensagem = "Quantidade atualizada!", novoTotal = pedido.ValorTotal });
         }
 
-        // DELETE: api/pedidos/5/itens/10 (Remover Item do Pedido)
+        // DELETE: api/pedidos/5/itens/10 (Remover Item)
         [HttpDelete("{pedidoId}/itens/{itemId}")]
         public async Task<IActionResult> RemoverItemDoPedido(int pedidoId, int itemId)
         {
-            // 1. Busca o Item no banco (incluindo o Produto para devolver estoque)
             var item = await _context.ItensPedido
                 .Include(i => i.Produto)
                 .FirstOrDefaultAsync(i => i.Id == itemId && i.PedidoId == pedidoId);
 
             if (item == null) return NotFound("Item não encontrado neste pedido.");
 
-            // 2. Verifica se o pedido ainda está aberto
             var pedido = await _context.Pedidos.FindAsync(pedidoId);
             if (pedido.Status == "PAGO" || pedido.Status == "CANCELADO")
                 return BadRequest("Não é possível remover itens de um pedido fechado.");
 
-            // 3. DEVOLVE O ESTOQUE
+            // Devolve Estoque (Double)
             if (item.Produto != null)
             {
                 item.Produto.SaldoEstoque += item.Quantidade;
             }
 
-            // 4. ATUALIZA O VALOR TOTAL DO PEDIDO
-            // CORREÇÃO: Cast explícito para (decimal)
+            // Atualiza Total
             pedido.ValorTotal -= ((decimal)item.Quantidade * item.PrecoUnitarioVenda);
             
             if (pedido.ValorTotal < 0) pedido.ValorTotal = 0;
 
-            // 5. REMOVE O ITEM DO BANCO
             _context.ItensPedido.Remove(item);
             
             await _context.SaveChangesAsync();
@@ -244,7 +246,7 @@ namespace Espeto.Controllers
         }
     }
 
-    // --- DTOs ATUALIZADOS ---
+    // --- DTOs PARA RECEBER DADOS DO FRONTEND ---
     public class CriarPedidoDto
     {
         public int ClienteId { get; set; } 
@@ -254,7 +256,11 @@ namespace Espeto.Controllers
     public class ItemPedidoDto
     {
         public int ProdutoId { get; set; }
-        // CORREÇÃO: Alterado para double para aceitar 0.5, 0.3, etc.
+        
+        // Quantidade agora é Double (aceita 0.3, 0.5, 1.0)
         public double Quantidade { get; set; } 
+        
+        // Preço Opcional (se vier preenchido, o sistema usa esse em vez do cadastro)
+        public decimal PrecoPersonalizado { get; set; }
     }
 }
