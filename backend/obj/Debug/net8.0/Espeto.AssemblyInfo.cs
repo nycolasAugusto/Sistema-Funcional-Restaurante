@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Espeto")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1397100cd12d55900dcea68d0d0268a00cdfa94c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ed12d2e4785d101d006a0417464180c157334b8f")]
 [assembly: System.Reflection.AssemblyProductAttribute("Espeto")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Espeto")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

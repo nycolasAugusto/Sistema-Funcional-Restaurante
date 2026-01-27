@@ -115,9 +115,19 @@ button:hover {
     font-size: 13px;
 }
 
-.btn-editar { background-color: #f39c12; }
-.btn-add-estoque { background-color: #27ae60; }
-.btn-venda { background-color: #e74c3c; }
+.btn-editar { background-color: #f39c12; 
+    padding: 4px 7px;
+}
+
+.btn-entrada{ 
+    background-color: #27ae60; 
+    padding: 5px 8px;
+ 
+}
+    .btn-saida{ 
+    background-color: #e74c3c;
+    padding: 5px 8px;
+}
 
 /* --- FILTROS --- */
 .filtros-container {
