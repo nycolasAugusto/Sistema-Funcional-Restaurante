@@ -13,7 +13,7 @@ namespace Espeto.Models
         public int ProdutoId { get; set; }
         public Produto Produto { get; set; }
 
-        public int Quantidade { get; set; }
+        public double Quantidade { get; set; }
 
         // Por quanto vendeu (Preço do Cardápio na época)
         public decimal PrecoUnitarioVenda { get; set; }

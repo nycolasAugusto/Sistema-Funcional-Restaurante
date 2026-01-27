@@ -336,53 +336,51 @@ function renderizarItensEdicao() {
 }
 
 /* --- AÇÃO DE AUMENTAR OU DIMINUIR QUANTIDADE --- */
+/* --- AÇÃO DE AUMENTAR OU DIMINUIR QUANTIDADE (COM PUT) --- */
 async function alterarQuantidadeItem(idItemPedido, idProduto, delta, qtdAtual) {
-    // Delta é +1 (aumentar) ou -1 (diminuir)
-    
-    // Se for diminuir e a qtd for 1, pergunta se quer apagar
-    if (delta === -1 && qtdAtual === 1) {
+    // Calcula a nova quantidade desejada
+    const novaQtd = qtdAtual + delta;
+
+    // 1. Se for diminuir para zero, cai na lógica de remover
+    if (novaQtd <= 0) {
         removerItemCompleto(idItemPedido);
         return;
     }
 
     try {
-        if (delta === 1) {
-            // AUMENTAR: Adiciona +1 do mesmo produto
-            const payload = { produtoId: idProduto, quantidade: 1 };
-            await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/itens`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-        } else {
-            // DIMINUIR: Remove o item atual e cria um novo com qtd-1
-            // (Isso é necessário se seu backend não tiver rota de edição direta)
-            
-            // 1. Deleta
-            await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/itens/${idItemPedido}`, { method: 'DELETE' });
-            
-            // 2. Recria com menos
-            const novaQtd = qtdAtual - 1;
-            if (novaQtd > 0) {
-                 await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/itens`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ produtoId: idProduto, quantidade: novaQtd })
-                });
-            }
-        }
+        // AGORA USAMOS O PUT (EDITAR)
+        const payload = { 
+            produtoId: idProduto, // O Backend pede, mas vai ignorar se a lógica for só qtd
+            quantidade: novaQtd 
+        };
 
-        // Atualiza tudo
-        await atualizarPedidoAtivo(pedidoAtivo.id);
-        renderizarItensEdicao(); // Redesenha o modal
-        renderPedidos(); // Atualiza a lista de fundo
+        const res = await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/itens/${idItemPedido}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            // Sucesso! Atualiza a tela
+            await atualizarPedidoAtivo(pedidoAtivo.id);
+            
+            // Se o modal estiver aberto, redesenha ele
+            const modalEdit = document.getElementById('modalEditar');
+            if(modalEdit && modalEdit.style.display === 'flex') {
+                renderizarItensEdicao(); 
+            }
+
+            renderPedidos(); // Atualiza o fundo (cards)
+        } else {
+            const msg = await res.text();
+            alert("Erro: " + msg); // Mostra erro de estoque se houver
+        }
 
     } catch (error) {
         console.error("Erro ao alterar qtd:", error);
-        alert("Erro ao atualizar item. Verifique o console.");
+        alert("Erro de conexão.");
     }
 }
-
 /* --- AÇÃO DE REMOVER O ITEM INTEIRO (LIXEIRA) --- */
 async function removerItemCompleto(idItemPedido) {
     if(!confirm("Remover este item do pedido?")) return;
@@ -590,6 +588,44 @@ setInterval(() => {
         // location.reload(); 
     }
 }, 15000);
+
+/* ==================================================
+   LÓGICA DO CHOPP (BOTÕES RÁPIDOS)
+   ================================================== */
+
+/* ==================================================
+   LÓGICA DO CHOPP (LIMPA)
+   ================================================== */
+
+function verificarSeEhChopp() {
+    const select = document.getElementById('selectProduto');
+    const areaAtalhos = document.getElementById('atalhosChopp');
+    const inputQtd = document.getElementById('qtdPedido');
+    
+    // Pega o texto do item selecionado
+    // (Proteção: se nada selecionado, texto vazio)
+    const textoOpcao = select.selectedIndex >= 0 ? select.options[select.selectedIndex].text : "";
+
+    // Verifica se é Chopp
+    if (textoOpcao.toLowerCase().includes('chopp') || textoOpcao.toLowerCase().includes('chop')) {
+        // MOSTRA OS ATALHOS
+        areaAtalhos.style.display = 'flex'; 
+        inputQtd.placeholder = "Litros (ex: 0.3)";
+        inputQtd.focus(); // Já põe o cursor lá
+    } else {
+        // ESCONDE OS ATALHOS (Volta ao normal)
+        areaAtalhos.style.display = 'none'; 
+        inputQtd.placeholder = "Qtd";
+        inputQtd.value = ""; // Limpa se trocou de produto
+    }
+}
+
+// Função dos botões amarelos
+function definirQtdEAdicionar(valor) {
+    document.getElementById('qtdPedido').value = valor;
+    adicionarAoPedido();
+}
+
 // INICIALIZAÇÃO
 document.addEventListener("DOMContentLoaded", () => {
     carregarProdutosNoSelect();

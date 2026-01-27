@@ -53,7 +53,7 @@ function filtrarTabela() {
                 <td>${p.tipo}</td>
                 <td>R$ ${p.custoMedio ? p.custoMedio.toFixed(2) : '0.00'}</td>
                 <td>R$ ${p.valorVenda.toFixed(2)}</td>
-                <td style="${corEstoque}">${p.saldoEstoque}</td>
+                <td style="${corEstoque}">${parseFloat(p.saldoEstoque.toFixed(3))}</td>
                 <td>${textoStatus}</td>
                 <td>
                     <button class="btn-editar" onclick="abrirEdicao(${p.id})">✏️</button>

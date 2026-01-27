@@ -270,7 +270,7 @@ button {
 /* === BOTÃO EDITAR (Amarelo) === */
 .btn-editar {
     background-color: #68440b; /* Laranja/Amarelo */
-    color: rgb(207, 85, 85);
+    color: rgb(247, 244, 244);
     border: none;
     border-radius: 8px;
     font-weight: bold;
@@ -486,6 +486,19 @@ button {
     padding: 15px;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,.06);
+}
+.btn-atalho {
+    flex: 1;
+    padding: 10px;
+    background-color: #f1c40f; /* Amarelo Cerveja */
+    border: 1px solid #d4ac0d;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+}
+.btn-atalho:hover {
+    background-color: #d4ac0d;
 }
 
 /* ==================================================

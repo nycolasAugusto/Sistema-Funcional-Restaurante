@@ -46,7 +46,7 @@ namespace Espeto.Controllers
             // 1. Cria o Pedido (Cabeçalho)
             var pedido = new Pedido
             {
-                ClienteId = dto.ClienteId, // <--- USA O ID, NÃO O NOME
+                ClienteId = dto.ClienteId,
                 DataPedido = DateTime.Now,
                 Status = "ABERTO",
                 Itens = new List<ItemPedido>()
@@ -72,11 +72,11 @@ namespace Espeto.Controllers
                     
                     // --- FINANCEIRO ---
                     PrecoUnitarioVenda = produto.ValorVenda, 
-                    CustoUnitario = produto.CustoMedio // Grava o custo aqui!
+                    CustoUnitario = produto.CustoMedio 
                 };
 
-                // Atualiza totais e estoque
-                totalPedido += (novoItem.PrecoUnitarioVenda * novoItem.Quantidade);
+                // CORREÇÃO: Cast explícito para (decimal) na quantidade
+                totalPedido += (novoItem.PrecoUnitarioVenda * (decimal)novoItem.Quantidade);
                 produto.SaldoEstoque -= itemDto.Quantidade;
 
                 pedido.Itens.Add(novoItem);
@@ -111,18 +111,18 @@ namespace Espeto.Controllers
             var novoItem = new ItemPedido
             {
                 PedidoId = id,
-                ProdutoId = produto.Id, // Mudei para usar ID direto, é mais seguro
+                ProdutoId = produto.Id,
                 Quantidade = itemDto.Quantidade,
                 
-                // --- FINANCEIRO NO ITEM EXTRA TAMBÉM ---
+                // --- FINANCEIRO ---
                 PrecoUnitarioVenda = produto.ValorVenda,
                 CustoUnitario = produto.CustoMedio 
             };
 
-            pedido.ValorTotal += (novoItem.Quantidade * novoItem.PrecoUnitarioVenda);
+            // CORREÇÃO: Cast explícito para (decimal)
+            pedido.ValorTotal += ((decimal)novoItem.Quantidade * novoItem.PrecoUnitarioVenda);
             
-            _context.ItensPedido.Add(novoItem); // Adiciona direto na tabela de itens
-            // pedido.Itens.Add(novoItem); // (Opcional se já salvou no contexto acima)
+            _context.ItensPedido.Add(novoItem); 
             
             await _context.SaveChangesAsync();
 
@@ -155,12 +155,98 @@ namespace Espeto.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { mensagem = "Pedido pago com sucesso!" });
         }
+
+        // PUT: api/pedidos/5/itens/10 (Editar Quantidade do Item)
+        [HttpPut("{pedidoId}/itens/{itemId}")]
+        public async Task<IActionResult> AtualizarItemPedido(int pedidoId, int itemId, [FromBody] ItemPedidoDto dto)
+        {
+            if (dto.Quantidade <= 0)
+                return BadRequest("A quantidade deve ser maior que zero.");
+
+            // 1. Busca o item e o produto (para mexer no estoque)
+            var item = await _context.ItensPedido
+                .Include(i => i.Produto)
+                .FirstOrDefaultAsync(i => i.Id == itemId && i.PedidoId == pedidoId);
+
+            if (item == null) return NotFound("Item não encontrado.");
+
+            // 2. Busca o pedido para validar status e atualizar total
+            var pedido = await _context.Pedidos.FindAsync(pedidoId);
+            if (pedido.Status == "PAGO" || pedido.Status == "CANCELADO")
+                return BadRequest("Pedido fechado não pode ser alterado.");
+
+            // 3. LÓGICA DE ESTOQUE
+            // CORREÇÃO: Usar double para a diferença
+            double diferenca = dto.Quantidade - item.Quantidade;
+
+            if (diferenca > 0) // Aumentando quantidade
+            {
+                if (item.Produto.SaldoEstoque < diferenca)
+                    return BadRequest($"Estoque insuficiente. Só restam {item.Produto.SaldoEstoque}.");
+                
+                item.Produto.SaldoEstoque -= diferenca;
+            }
+            else if (diferenca < 0) // Diminuindo quantidade
+            {
+                item.Produto.SaldoEstoque += Math.Abs(diferenca); 
+            }
+
+            // 4. Atualiza o TOTAL do Pedido
+            // CORREÇÃO: Cast explícito para (decimal)
+            pedido.ValorTotal -= ((decimal)item.Quantidade * item.PrecoUnitarioVenda);
+            pedido.ValorTotal += ((decimal)dto.Quantidade * item.PrecoUnitarioVenda);
+
+            // Garante que não fique negativo por erro de arredondamento
+            if (pedido.ValorTotal < 0) pedido.ValorTotal = 0;
+
+            // 5. Atualiza o item
+            item.Quantidade = dto.Quantidade;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensagem = "Quantidade atualizada!", novoTotal = pedido.ValorTotal });
+        }
+
+        // DELETE: api/pedidos/5/itens/10 (Remover Item do Pedido)
+        [HttpDelete("{pedidoId}/itens/{itemId}")]
+        public async Task<IActionResult> RemoverItemDoPedido(int pedidoId, int itemId)
+        {
+            // 1. Busca o Item no banco (incluindo o Produto para devolver estoque)
+            var item = await _context.ItensPedido
+                .Include(i => i.Produto)
+                .FirstOrDefaultAsync(i => i.Id == itemId && i.PedidoId == pedidoId);
+
+            if (item == null) return NotFound("Item não encontrado neste pedido.");
+
+            // 2. Verifica se o pedido ainda está aberto
+            var pedido = await _context.Pedidos.FindAsync(pedidoId);
+            if (pedido.Status == "PAGO" || pedido.Status == "CANCELADO")
+                return BadRequest("Não é possível remover itens de um pedido fechado.");
+
+            // 3. DEVOLVE O ESTOQUE
+            if (item.Produto != null)
+            {
+                item.Produto.SaldoEstoque += item.Quantidade;
+            }
+
+            // 4. ATUALIZA O VALOR TOTAL DO PEDIDO
+            // CORREÇÃO: Cast explícito para (decimal)
+            pedido.ValorTotal -= ((decimal)item.Quantidade * item.PrecoUnitarioVenda);
+            
+            if (pedido.ValorTotal < 0) pedido.ValorTotal = 0;
+
+            // 5. REMOVE O ITEM DO BANCO
+            _context.ItensPedido.Remove(item);
+            
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensagem = "Item removido, total atualizado e estoque devolvido!" });
+        }
     }
 
     // --- DTOs ATUALIZADOS ---
     public class CriarPedidoDto
     {
-        // Corrigido: Usa ID do cliente
         public int ClienteId { get; set; } 
         public List<ItemPedidoDto> Itens { get; set; }
     }
@@ -168,6 +254,7 @@ namespace Espeto.Controllers
     public class ItemPedidoDto
     {
         public int ProdutoId { get; set; }
-        public int Quantidade { get; set; }
+        // CORREÇÃO: Alterado para double para aceitar 0.5, 0.3, etc.
+        public double Quantidade { get; set; } 
     }
 }

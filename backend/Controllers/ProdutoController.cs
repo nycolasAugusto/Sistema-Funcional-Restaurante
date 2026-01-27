@@ -34,7 +34,7 @@ namespace Espeto.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetProdutos), new { id = produto.Id }, produto);
-        } // <--- O ERRO PROVAVELMENTE ESTAVA FALTANDO ESSA CHAVE AQUI
+        }
 
         // PUT: api/produto/5
         [HttpPut("{id}")]
@@ -57,7 +57,7 @@ namespace Espeto.Controllers
             return NoContent();
         }
 
-        // POST: api/produto/5/estoque (Adiciona Estoque e Calcula Média)
+        // POST: api/produto/5/estoque (Adicionar Estoque e Calcula Média)
         [HttpPost("{id}/estoque")]
         public async Task<IActionResult> AdicionarEstoque(int id, [FromBody] EntradaEstoqueDto entrada)
         {
@@ -65,18 +65,22 @@ namespace Espeto.Controllers
             if (produto == null) return NotFound("Produto não encontrado.");
 
             // 1. Calcular valor total do estoque ATUAL
-            decimal valorTotalAtual = produto.SaldoEstoque * produto.CustoMedio;
+            // CORREÇÃO: Converter SaldoEstoque (double) para decimal na conta
+            decimal valorTotalAtual = (decimal)produto.SaldoEstoque * produto.CustoMedio;
 
             // 2. Calcular valor da NOVA entrada
-            decimal valorNovaEntrada = entrada.Quantidade * entrada.ValorPagoUnitario;
+            // CORREÇÃO: Converter entrada.Quantidade (double) para decimal
+            decimal valorNovaEntrada = (decimal)entrada.Quantidade * entrada.ValorPagoUnitario;
 
             // 3. Novo Saldo de Quantidade
-            int novoSaldoQtd = produto.SaldoEstoque + entrada.Quantidade;
+            // CORREÇÃO: Agora a soma resulta em double (ex: 50.0 + 0.5)
+            double novoSaldoQtd = produto.SaldoEstoque + entrada.Quantidade;
 
             // 4. Novo Custo Médio (Total em R$ / Total em Qtd)
             if (novoSaldoQtd > 0)
             {
-                produto.CustoMedio = (valorTotalAtual + valorNovaEntrada) / novoSaldoQtd;
+                // CORREÇÃO: Dividir pelo novo saldo convertido para decimal
+                produto.CustoMedio = (valorTotalAtual + valorNovaEntrada) / (decimal)novoSaldoQtd;
             }
 
             // 5. Atualiza Estoque
@@ -91,7 +95,8 @@ namespace Espeto.Controllers
     // DTO simples para receber os dados do JSON sem sujar a classe principal
     public class EntradaEstoqueDto
     {
-        public int Quantidade { get; set; }
+        // CORREÇÃO: Mudado de int para double para aceitar 0.5, 1.5, etc.
+        public double Quantidade { get; set; }
         public decimal ValorPagoUnitario { get; set; }
     }
 }

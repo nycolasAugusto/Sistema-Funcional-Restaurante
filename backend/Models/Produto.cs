@@ -9,7 +9,7 @@ namespace Espeto.Models
         public decimal ValorVenda { get; set; }
         public decimal CustoMedio { get; set; }
         
-        public int SaldoEstoque { get; set; }
+        public double SaldoEstoque { get; set; }
         public bool Ativo { get; set; }
     }
 }

@@ -109,7 +109,7 @@ function preencherTabelaDetalhada(dados) {
         tbody.innerHTML += `
             <tr>
                 <td>${nome}</td>
-                <td>${info.qtd}</td>
+                <td>${parseFloat(info.qtd.toFixed(3))}</td>
                 <td>${formatarMoeda(precoMedio)}</td>
                 <td style="color:#dc3545">${formatarMoeda(info.custoUnitario)}</td>
                 <td style="font-weight:bold; color:${lucro >= 0 ? 'green' : 'red'}">
