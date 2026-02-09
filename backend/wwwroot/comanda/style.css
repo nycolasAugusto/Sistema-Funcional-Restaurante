@@ -502,167 +502,109 @@ button {
 }
 
 /* ==================================================
-   IMPRESSÃO TÉRMICA 58MM - AJUSTE FINAL
+   IMPRESSÃO TÉRMICA - SOLUÇÃO DEFINITIVA (SEM CORTES)
    ================================================== */
 @media print {
-    /* 1. CONFIGURAÇÃO BÁSICA */
+    
+    /* 1. CONFIGURAÇÃO DA FOLHA (Rolo contínuo) */
     @page {
         margin: 0;
-        size: 58mm auto;
+        size: 58mm auto; 
     }
 
-    /* 2. Oculta o resto do site */
+    /* 2. LIMPA TUDO (Reset Geral) */
+    html, body {
+        height: auto !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    /* Oculta tudo na página por padrão */
     body * {
         visibility: hidden;
-        height: 0;
-        overflow: hidden;
     }
 
-    /* 3. Mostra o pedido */
-    .pedido-info, .pedido-info * {
-        visibility: visible;
-        height: auto;
-    }
-
-    /* 4. O GRANDE TRUQUE: ZOOM E LARGURA REDUZIDA */
+    /* 3. POSICIONA A COMANDA NO TOPO */
     .pedido-info {
+        /* Torna visível apenas a comanda */
+        visibility: visible;
+        
+        /* Tira ela do lugar original e cola no topo do papel */
         position: absolute;
         left: 0;
         top: 0;
         
-        /* Reduzi de 52mm para 45mm (Margem de segurança agressiva) */
+        /* Força largura total do papel */
         width: 100% !important;
-        max-width: 45mm !important; 
+        max-width: 58mm !important; 
         
-        /* Diminui tudo em 10% para garantir que caiba */
-        zoom: 0.9; 
-
-        margin: 0;
-        padding: 0;
+        /* IMPORTANTE: Remove bordas e sombras do card */
         box-shadow: none !important;
         border: none !important;
-        display: block;
-        background: white;
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        padding-bottom: 60px !important; /* Espaço extra no final para corte */
     }
 
-    /* 5. TEXTO FORTE E PRETO */
+    /* Torna visível tudo que está DENTRO da comanda */
+    .pedido-info * {
+        visibility: visible;
+    }
+
+    /* 4. O PULO DO GATO: DESTRAVAR A LISTA DE ITENS */
+    /* Isso remove a barra de rolagem e força a lista a crescer */
+    #listaItens, .itens-pedido {
+        display: block !important;
+        
+        /* ANULA qualquer limite de altura da tela */
+        max-height: none !important; 
+        height: auto !important;
+        min-height: auto !important;
+        
+        /* ANULA a barra de rolagem */
+        overflow: visible !important; 
+        
+        /* Remove bordas internas */
+        border: none !important;
+    }
+
+    /* 5. AJUSTES VISUAIS (FONTE E CORES) */
     .pedido-info h3, 
     .pedido-info p, 
-    .pedido-info strong,
+    .pedido-info strong, 
+    .pedido-info span, 
     .pedido-info div {
-        color: #000000 !important; 
-        font-family: Arial, Helvetica, sans-serif !important; 
-        font-weight: 900 !important; /* Negrito extra forte */
+        color: black !important;
+        font-family: 'Courier New', monospace !important; /* Fonte de recibo */
+        font-size: 11px !important; /* Tamanho seguro para 58mm */
+        line-height: 1.2 !important;
     }
 
-    /* 6. CORREÇÃO ESPECÍFICA DO PREÇO TOTAL */
-    .pedido-info .total {
+    /* Cabeçalho do Pedido */
+    .pedido-info h3 {
         font-size: 14px !important;
-        border-top: 2px dashed #000; 
-        margin-top: 5px;
-        padding-top: 5px;
-        text-align: right; /* Alinha à direita */
-        
-        /* O PULO DO GATO PARA O PREÇO: */
-        margin-right: 5px !important; /* Empurra o preço para longe da borda direita */
-        white-space: nowrap; /* Proíbe quebrar a linha no meio do número */
+        font-weight: bold !important;
+        text-align: center;
+        border-bottom: 1px dashed #000;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
     }
 
-    /* Esconde botões */
-    .btn-novo, .acoes, .filtros-categoria, .adicionar-itens {
-        display: none !important;
-    }
-}
-/* ==========================================================
-   LAYOUT MOBILE - VERSÃO "ANTI-SOBREPOSIÇÃO"
-   (Cole no final do style.css limpo de outros medias)
-   ========================================================== */
-@media (max-width: 768px) {
-
-    /* 1. DESTRAVAR AS ALTURAS (O Segredo para não encavalar) */
-    body, html {
-        height: auto !important;
-        overflow-x: hidden; /* Evita rolagem lateral */
-    }
-
-    /* O container que segura o card deve crescer */
-    .linha-topo {
-        display: flex !important;
-        flex-direction: column !important;
-        width: 100% !important;
-        height: auto !important; /* IMPORTANTE */
-        gap: 20px !important;
-        margin-bottom: 20px !important;
-    }
-
-    /* O Card onde estão os inputs deve crescer */
-    .adicionar-itens {
-        width: 100% !important;
-        height: auto !important; /* IMPORTANTE */
-        min-height: 400px !important; /* Garante altura mínima para caber os inputs */
-        display: block !important;
-        padding-bottom: 30px !important; /* Espaço extra no fundo do card */
-    }
-
-    /* 2. INPUTS GIGANTES */
-    .controles-pedido {
-        display: flex;
-        flex-direction: column;
-        gap: 15px !important;
+    /* Total */
+    .pedido-info .total {
         margin-top: 15px;
-        width: 100%;
-    }
-
-    #selectProduto, 
-    #qtdPedido {
-        width: 100% !important;
-        height: 60px !important;
-        font-size: 1.2rem !important;
-        padding: 10px;
-        background: #fff;
-        border: 2px solid #ccc;
-        box-sizing: border-box; /* Garante que a borda não aumente a largura */
-    }
-
-    .btn-add {
-        width: 100% !important;
-        height: 65px !important;
-        font-size: 1.3rem !important;
-        font-weight: bold;
-        margin-top: 10px;
-        margin-bottom: 20px !important; /* Empurra tudo que vier depois */
-    }
-
-    /* 3. BOTÕES DE AÇÃO (Separados e Seguros) */
-    .acoes {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px !important;
-        width: 100% !important;
-        margin-top: 40px !important; /* Margem de segurança GIGANTE */
-        position: relative !important; /* Garante que obedeça o fluxo */
-        clear: both !important; /* Limpa flutuações */
-    }
-
-    .btn-novo {
-        grid-column: 1 / -1 !important;
-        padding: 15px !important;
-        font-size: 1.1rem !important;
-        order: 1;
-    }
-
-    .btn-comanda, .btn-pagar {
-        padding: 15px !important;
-        order: 2;
+        padding-top: 5px;
+        border-top: 1px dashed #000;
+        text-align: right;
+        font-size: 14px !important;
+        font-weight: bold !important;
     }
     
-    /* Demais ajustes */
-    .pedido-info {
-        width: 100% !important;
-    }
-    .filtros-categoria {
-        display: flex;
-        overflow-x: auto;
-        padding-bottom: 10px;
+    /* 6. REMOVER BOTÕES E FILTROS QUE POSSAM APARECER */
+    .acoes, .btn-novo, .filtros-categoria, .adicionar-itens, button, .linha-topo > *:not(.pedido-info) {
+        display: none !important;
     }
 }

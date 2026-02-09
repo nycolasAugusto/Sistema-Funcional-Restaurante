@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contabilidade - Detalhe de Pedidos</title>
+    <link rel="stylesheet" href="./cont.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="topo">
+        <div class="logo">Espetim da 5ª Série</div>
+        <nav>
+             <a href="../comanda/index.html">Pedido</a>
+            <a href="../produto/produtos.html">Produtos</a>
+            <a href="../cliente/clientes.html">Clientes</a>
+            <a href="../financeiro/fin.html" class="">Financeiro</a>
+            <a href="#" class="active">Contabilidade</a>
+        </nav>
+    </header>
+    <div style="margin: 20px 0; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px;">
+    <strong>⚠️ Correção de Base:</strong> 
+    <button onclick="recalcularTaxasAntigas()" style="padding: 8px 15px; cursor: pointer; background: #ff9800; color: white; border: none; border-radius: 4px; font-weight: bold;">
+        🔄 Recalcular Taxas de Pedidos Antigos
+    </button>
+</div>
+    <div class="container">
+        
+        <div class="header-page">
+            <h2>Livro Razão (Pedidos Detalhados)</h2>
+            <p>Analise o lucro real de cada comanda fechada.</p>
+        </div>
+
+        <div class="area-filtros">
+            <div class="grupo-input">
+                <label>Data Inicial:</label>
+                <input type="date" id="dataInicio">
+            </div>
+            <div class="grupo-input">
+                <label>Data Final:</label>
+                <input type="date" id="dataFim">
+            </div>
+            <button onclick="carregarDados()" class="btn-filtrar">Filtrar</button>
+        </div>
+
+        <div class="tabela-box">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#ID</th>
+                        <th>Data/Hora</th>
+                        <th>Cliente</th>
+                        <th>Método</th>
+                        <th>Venda Bruta</th>
+                        <th>Taxa (Maq.)</th>
+                        <th>Custo Prod.</th>
+                        <th>Lucro Líquido</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaContabilidade">
+                    </tbody>
+                <tfoot>
+                    <tr class="linha-total">
+                        <td colspan="4">TOTAIS DO PERÍODO</td>
+                        <td id="totalBruto">R$ 0,00</td>
+                        <td id="totalTaxas" style="color:red">R$ 0,00</td>
+                        <td id="totalCustos" style="color:red">R$ 0,00</td>
+                        <td id="totalLiquido">R$ 0,00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div id="modalItens" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tituloModal">Itens do Pedido #000</h3>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <table class="tabela-itens">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Qtd</th>
+                            <th>Preço Venda</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaItensModal">
+                        </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button onclick="fecharModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./cont.js"></script>
+</body>
+</html>

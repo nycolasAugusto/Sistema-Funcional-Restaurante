@@ -474,36 +474,55 @@ async function confirmarPagamento() {
     const metodo = document.getElementById('selectPagamento').value;
 
     if (!metodo) {
-        alert("Por favor, selecione a forma de pagamento.");
+        alert("Selecione a forma de pagamento.");
         return;
     }
 
-    if (!confirm(`Confirma o pagamento de R$ ${pedidoAtivo.valorTotal.toFixed(2)} no ${metodo}?`)) {
+    const total = pedidoAtivo.valorTotal;
+    let valorTaxa = 0;
+
+    // --- AQUI ESTÁ A AUTOMAÇÃO (CONFIGURE SUAS PORCENTAGENS) ---
+    // Exemplo: 
+    // Crédito = 4.99% (0.0499)
+    // Débito = 1.99% (0.0199)
+    // Pix/Dinheiro = 0%
+
+    if (metodo === 'CREDITO') {
+        valorTaxa = total * 0.035; // 5% de taxa
+    } 
+    else if (metodo === 'DEBITO') {
+        valorTaxa = total * 0.015; // 2% de taxa
+    }
+    else {
+        valorTaxa = 0; // PIX e DINHEIRO não tem taxa
+    }
+
+    // Pergunta de confirmação (mostra o valor final para o garçom conferir)
+    if (!confirm(`Confirmar pagamento de R$ ${total.toFixed(2)} no ${metodo}?`)) {
         return;
     }
+
+    // Empacota os dados para enviar ao Backend
+    const payload = {
+        metodo: metodo,
+        taxa: parseFloat(valorTaxa.toFixed(2)) // Envia a taxa calculada automaticamente
+    };
 
     try {
-        // Envia ao backend: /api/pedidos/5/pagar?metodo=PIX
-        const response = await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/pagar?metodo=${metodo}`, {
-            method: 'PUT'
+        const response = await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/pagar`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
         if (response.ok) {
-            alert("Pagamento Realizado com Sucesso!");
-            
+            alert("Pagamento Realizado!");
             fecharModalPagamento();
-            
-            // Limpa a seleção da tela
             pedidoAtivo = null;
-            document.getElementById('pedidoNumero').innerText = "-";
-            document.getElementById('pedidoCliente').innerText = "-";
-            document.getElementById('listaItens').innerHTML = '<p class="vazio">Nenhum item adicionado</p>';
-            document.getElementById('pedidoTotal').innerText = "0,00";
-
-            // Atualiza a lista (O pedido vai sumir pois agora é status PAGO)
-            renderPedidos();
+            renderPedidos(); 
         } else {
-            alert("Erro ao processar pagamento.");
+            const msg = await response.text();
+            alert("Erro ao processar: " + msg);
         }
 
     } catch (error) {

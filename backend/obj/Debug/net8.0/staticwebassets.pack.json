@@ -25,6 +25,18 @@
       "PackagePath": "staticwebassets\\comanda\\style.css"
     },
     {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\contabilidade\\cont.css",
+      "PackagePath": "staticwebassets\\contabilidade\\cont.css"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\contabilidade\\cont.html",
+      "PackagePath": "staticwebassets\\contabilidade\\cont.html"
+    },
+    {
+      "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\contabilidade\\cont.js",
+      "PackagePath": "staticwebassets\\contabilidade\\cont.js"
+    },
+    {
       "Id": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\financeiro\\fin.css",
       "PackagePath": "staticwebassets\\financeiro\\fin.css"
     },

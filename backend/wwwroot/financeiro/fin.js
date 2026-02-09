@@ -1,20 +1,43 @@
 const API_URL = "/api";
 
-// Ao abrir a tela, define as datas de hoje e carrega
+// When opening the screen, sets today's dates and loads
 document.addEventListener("DOMContentLoaded", () => {
     const hoje = new Date().toISOString().split('T')[0];
     document.getElementById('dataInicio').value = hoje;
     document.getElementById('dataFim').value = hoje;
     
-    gerarRelatorio();
+    // Optional: Load automatically on startup
+    // gerarRelatorio();
 });
 
+// --- HELPER FUNCTIONS (Formatting) ---
+function formatarMoeda(valor) {
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function formatarData(dataString) {
+    if (!dataString) return "-";
+    const data = new Date(dataString);
+    return data.toLocaleString('pt-BR');
+}
+
+function getBadgePagamento(metodo) {
+    if (!metodo) return "";
+    const m = metodo.toUpperCase();
+    if (m === 'PIX') return `<span style="background:#32bcad; color:white; padding:2px 6px; border-radius:4px; font-size:0.8em">PIX</span>`;
+    if (m === 'CREDITO') return `<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:0.8em">CRÉDITO</span>`;
+    if (m === 'DEBITO') return `<span style="background:#f59e0b; color:white; padding:2px 6px; border-radius:4px; font-size:0.8em">DÉBITO</span>`;
+    return `<span style="background:#10b981; color:white; padding:2px 6px; border-radius:4px; font-size:0.8em">${m}</span>`;
+}
+
+// --- MAIN FUNCTION ---
 async function gerarRelatorio() {
     const dtInicio = document.getElementById('dataInicio').value;
     const dtFim = document.getElementById('dataFim').value;
 
     if(!dtInicio || !dtFim) return alert("Selecione as datas!");
 
+    // Adjusts time to capture the whole day
     const inicio = new Date(dtInicio + "T00:00:00");
     const fim = new Date(dtFim + "T23:59:59");
 
@@ -27,40 +50,52 @@ async function gerarRelatorio() {
         const listaPedidos = await resPedidos.json();
         const listaProdutos = await resProdutos.json();
 
-        // Filtra pedidos pela data e status
+        // 1. FILTER: Only PAID orders within the selected date
         const pedidosFiltrados = listaPedidos.filter(pedido => {
-            const dataPedido = new Date(pedido.dataPedido); 
-            // Ignora cancelados
-            return dataPedido >= inicio && dataPedido <= fim && pedido.status !== 'CANCELADO';
+            // Uses dataPagamento if available, otherwise dataPedido
+            const dataRef = pedido.dataPagamento ? new Date(pedido.dataPagamento) : new Date(pedido.dataPedido);
+            
+            return dataRef >= inicio && 
+                   dataRef <= fim && 
+                   pedido.status === 'PAGO'; 
         });
 
         let faturamentoTotal = 0;
-        let custoTotal = 0;
+        let custoMercadoriaTotal = 0;
+        let taxasTotal = 0; 
         const resumoProdutos = {};
 
+        // Clears the NEW Sales History table
+        const tbodyHistorico = document.getElementById('tabelaHistoricoVendas');
+        if (tbodyHistorico) tbodyHistorico.innerHTML = '';
+
+        // --- MAIN LOOP ---
         pedidosFiltrados.forEach(pedido => {
+            
+            const taxaDoPedido = pedido.taxaPagamento || 0;
+            taxasTotal += taxaDoPedido;
+            
+            // Calculates cost for this specific order
+            let custoDestePedido = 0;
+
             pedido.itens.forEach(item => {
                 const prodOriginal = listaProdutos.find(p => p.id === item.produtoId);
                 
-                // --- AQUI ESTÁ A CORREÇÃO FINANCEIRA ---
-                
-                // 1. Tenta pegar o Custo Real que gravamos na hora da venda (Histórico)
+                // Historical Cost Logic
                 let custoValido = item.custoUnitario;
-
-                // 2. Se for venda ANTIGA (antes dessa atualização), o custo vai ser 0.
-                // Nesse caso, usamos o custo atual do cadastro como "quebra-galho".
                 if ((!custoValido || custoValido === 0) && prodOriginal) {
                     custoValido = prodOriginal.custoMedio;
                 }
 
-                // Cálculos
-                const totalItemVenda = item.quantidade * item.precoUnitarioVenda; // Valor que vendeu
-                const totalItemCusto = item.quantidade * custoValido;             // Quanto custou
+                // Calculations
+                const totalItemVenda = item.quantidade * item.precoUnitarioVenda;
+                const totalItemCusto = item.quantidade * custoValido;
 
+                custoDestePedido += totalItemCusto;
                 faturamentoTotal += totalItemVenda;
-                custoTotal += totalItemCusto;
+                custoMercadoriaTotal += totalItemCusto;
 
-                // Agrupamento para a Tabela
+                // Grouping for Product Detail Table (Summary)
                 const nome = item.produto ? item.produto.nome : (prodOriginal ? prodOriginal.nome : "Item " + item.produtoId);
                 
                 if(!resumoProdutos[nome]) {
@@ -76,19 +111,44 @@ async function gerarRelatorio() {
                 resumoProdutos[nome].venda += totalItemVenda;
                 resumoProdutos[nome].custo += totalItemCusto;
             });
+
+            // --- FILLS THE NEW SALES HISTORY TABLE ---
+            if (tbodyHistorico) {
+                const lucroRealPedido = pedido.valorTotal - custoDestePedido - taxaDoPedido;
+                const clienteNome = pedido.cliente ? pedido.cliente.nome : 'Balcão';
+                const dataDisplay = formatarData(pedido.dataPagamento || pedido.dataPedido);
+
+                tbodyHistorico.innerHTML += `
+                    <tr>
+                        <td>#${pedido.id}</td>
+                        <td>${dataDisplay}</td>
+                        <td>${clienteNome}</td>
+                        <td>${getBadgePagamento(pedido.metodoPagamento)}</td>
+                        <td>${formatarMoeda(pedido.valorTotal)}</td>
+                        <td style="color: #ef4444;">- ${formatarMoeda(taxaDoPedido)}</td>
+                        <td style="color: ${lucroRealPedido >= 0 ? 'green' : 'red'}; font-weight: bold;">
+                            ${formatarMoeda(lucroRealPedido)}
+                        </td>
+                    </tr>
+                `;
+            }
         });
 
-        const lucroTotal = faturamentoTotal - custoTotal;
+        // 2. CALCULATE NET PROFIT
+        const lucroTotal = faturamentoTotal - (custoMercadoriaTotal + taxasTotal);
 
-        // Atualizar Cards
+        // --- UPDATE SCREEN CARDS ---
         document.getElementById('txtFaturamento').innerText = formatarMoeda(faturamentoTotal);
-        document.getElementById('txtCusto').innerText = formatarMoeda(custoTotal);
+        
+        // Visual Cost = Merchandise + Fees
+        const custoVisual = custoMercadoriaTotal + taxasTotal;
+        document.getElementById('txtCusto').innerText = formatarMoeda(custoVisual);
         
         const elLucro = document.getElementById('txtLucro');
         elLucro.innerText = formatarMoeda(lucroTotal);
         elLucro.style.color = lucroTotal >= 0 ? '#28a745' : '#dc3545';
 
-        // Preencher Tabela
+        // Fill Product Summary Table
         preencherTabelaDetalhada(resumoProdutos);
 
     } catch (error) {
@@ -98,13 +158,14 @@ async function gerarRelatorio() {
 }
 
 function preencherTabelaDetalhada(dados) {
-    const tbody = document.getElementById('tabelaFinanceira');
+    const tbody = document.getElementById('tabelaFinanceira'); // Product Table
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     for (const [nome, info] of Object.entries(dados)) {
         const lucro = info.venda - info.custo;
         const margem = info.venda > 0 ? ((lucro / info.venda) * 100).toFixed(1) : 0;
-        const precoMedio = info.venda / info.qtd;
+        const precoMedio = info.qtd > 0 ? info.venda / info.qtd : 0;
 
         tbody.innerHTML += `
             <tr>
@@ -123,8 +184,4 @@ function preencherTabelaDetalhada(dados) {
     if(Object.keys(dados).length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Nenhuma venda neste período.</td></tr>';
     }
-}
-
-function formatarMoeda(valor) {
-    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }

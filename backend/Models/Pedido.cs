@@ -14,7 +14,7 @@ namespace Espeto.Models
         public string? MetodoPagamento { get; set; }
         // Novo campo para controle financeiro (pode ser nulo se não foi pago ainda)
         public DateTime? DataPagamento { get; set; } 
-
+        public decimal TaxaPagamento { get; set; }
         public decimal ValorTotal { get; set; }
         public string Status { get; set; } // PENDENTE, PAGO, CANCELADO
 
