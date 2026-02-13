@@ -12,21 +12,82 @@ function fecharModal() {
     document.getElementById('clienteNome').value = '';
     if(document.getElementById('clienteCelular')) document.getElementById('clienteCelular').value = '';
 }
+/* ===== ABRIR MODAL DE PAGAMENTO (CORRIGIDO PARA PARCIAL) ===== */
 function abrirModalPagamento() {
     if (!pedidoAtivo) {
-        alert("Selecione um pedido primeiro para pagar!");
+        alert("Selecione um pedido primeiro!");
         return;
     }
 
-    // Mostra o valor no modal
-    document.getElementById('valorPagarModal').innerText = pedidoAtivo.valorTotal.toFixed(2);
+    const modal = document.getElementById('modalPagamento');
+    const inputValor = document.getElementById('inputValorPagar');
+    const displayTotal = document.getElementById('displayTotalOriginal');
+    const avisoRestante = document.getElementById('avisoRestante');
+    const labelTitulo = document.querySelector('#modalPagamento h3'); // Opcional: para mudar o título
+
+    // --- 1. CÁLCULO DO SALDO DEVEDOR ---
+    const totalOriginal = pedidoAtivo.valorTotal || 0;
+    const jaPago = pedidoAtivo.valorJaPago || 0; // O backend precisa mandar esse campo atualizado
     
-    // Abre o modal
-    document.getElementById('modalPagamento').style.display = 'flex';
+    // O valor que vai aparecer no modal é APENAS O QUE FALTA
+    const saldoDevedor = totalOriginal - jaPago;
+
+    // Se já está tudo pago (proteção extra)
+    if (saldoDevedor <= 0.01) {
+        alert("Este pedido já está totalmente pago!");
+        return;
+    }
+
+    // --- 2. ATUALIZA A TELA ---
+    
+    // Mostra o valor RESTANTE grande no topo
+    displayTotal.innerText = saldoDevedor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    // Se for parcial, muda o texto para "Restante a Pagar" para não confundir
+    if (jaPago > 0) {
+        displayTotal.style.color = "#ff9800"; // Laranja para indicar que é resto
+        if(labelTitulo) labelTitulo.innerText = `Finalizar Pedido (Restante)`;
+    } else {
+        displayTotal.style.color = "green";
+        if(labelTitulo) labelTitulo.innerText = `Finalizar Pedido`;
+    }
+
+    // Preenche o input com o valor RESTANTE (não o total)
+    inputValor.value = saldoDevedor.toFixed(2);
+    
+    // Limpa campos auxiliares
+    avisoRestante.innerText = "";
+    document.getElementById('selectPagamento').value = "";
+
+    // --- 3. LÓGICA DE CÁLCULO ENQUANTO DIGITA ---
+    inputValor.oninput = function() {
+        const digitado = parseFloat(this.value);
+        if(isNaN(digitado)) return;
+
+        // Compara o que ele digitou com o SALDO DEVEDOR (e não com o total original)
+        const falta = saldoDevedor - digitado;
+        
+        // Arredonda para evitar bugs de centavos (0.009999)
+        const faltaArredondada = Math.round(falta * 100) / 100;
+
+        if (faltaArredondada > 0) {
+            avisoRestante.innerHTML = `Faltará: <strong>R$ ${faltaArredondada.toFixed(2)}</strong>`;
+            avisoRestante.style.color = "#d9534f"; // Vermelho
+        } else if (faltaArredondada < 0) {
+            avisoRestante.innerText = "Valor maior que a dívida!";
+            avisoRestante.style.color = "orange";
+        } else {
+            avisoRestante.innerText = "Pagamento Completo";
+            avisoRestante.style.color = "green";
+        }
+    };
+
+    modal.style.display = 'flex';
+    inputValor.focus();
+    inputValor.select(); // Seleciona o texto para facilitar digitar por cima
 }
 function fecharModalPagamento() {
     document.getElementById('modalPagamento').style.display = 'none';
-    document.getElementById('selectPagamento').value = ""; // Limpa a seleção
 }
 
 function definirQtdEPreco(qtd, preco) {
@@ -103,37 +164,27 @@ async function criarPedido() {
 }
 
 /* ===== 2. LISTAR PEDIDOS (ORDEM CRESCENTE) ===== */
+/* ===== 2. LISTAR PEDIDOS (ATUALIZADO PARA PARCIAL) ===== */
 async function renderPedidos() {
     const lista = document.getElementById('listaPedidos');
-    //lista.innerHTML = '<p style="color:white; padding:10px;">Carregando...</p>';
 
     try {
         const response = await fetch(`${API_URL}/pedidos`);
-        
-        // DEBUG: Verifique no Console do navegador (F12) o que está chegando
         const pedidosDoBanco = await response.json();
-        console.log("Pedidos recebidos do banco:", pedidosDoBanco); 
-
+        
         lista.innerHTML = ''; 
 
-        // Verificação de segurança: Se não for array, encerra
-        if (!Array.isArray(pedidosDoBanco)) {
-            console.error("A resposta da API não é um array:", pedidosDoBanco);
-            lista.innerHTML = '<p style="color:white;">Erro no formato dos dados.</p>';
-            return;
-        }
+        if (!Array.isArray(pedidosDoBanco)) return;
 
-        // Filtra PENDENTES (ou ABERTO, verifique como está salvando no banco)
-        // No seu C# está salvando como "ABERTO", mas aqui você filtra "PENDENTE".
-        // CORREÇÃO: Vamos aceitar os dois para garantir.
-        const pedidosAbertos = pedidosDoBanco.filter(p => p.status === 'PENDENTE' || p.status === 'ABERTO');
+        // Filtra pedidos que não estão 100% pagos
+        const pedidosAbertos = pedidosDoBanco.filter(p => p.status === 'PENDENTE' || p.status === 'ABERTO' || p.status === 'PARCIAL');
 
         if (pedidosAbertos.length === 0) {
             lista.innerHTML = '<p style="color:#eee; padding:10px;">Nenhum pedido em aberto.</p>';
             return;
         }
 
-        // --- ORDEM CRESCENTE por ID ---
+        // Ordena por ID
         pedidosAbertos.sort((a, b) => a.id - b.id);
 
         pedidosAbertos.forEach(p => {
@@ -144,13 +195,27 @@ async function renderPedidos() {
                 div.classList.add('active');
             }
 
-            // Proteção para nome do cliente
+            // --- CÁLCULO DO SALDO ---
+            const total = p.valorTotal || 0;
+            const jaPago = p.valorJaPago || 0; // O backend precisa enviar esse campo
+            const saldoRestante = total - jaPago;
+
+            // Define cor e texto do valor
+            let valorTexto = `R$ ${saldoRestante.toFixed(2)}`;
+            let corValor = "#90ee90"; // Verde claro padrão
+
+            // Se for pagamento parcial, muda a cor para destacar e mostra aviso
+            if (p.status === 'PARCIAL') {
+                valorTexto = `Restam: R$ ${saldoRestante.toFixed(2)}`;
+                corValor = "#ffcc00"; // Amarelo/Laranja para chamar atenção
+            }
+
             const nomeCliente = p.cliente ? p.cliente.nome : 'Cliente Balcão';
 
             div.innerHTML = `
                 <strong>#${p.id} ${nomeCliente}</strong><br>
                 <span style="font-size:0.85em; color:#ddd;">${p.status}</span><br>
-                <strong style="color:#90ee90;">R$ ${p.valorTotal.toFixed(2)}</strong>
+                <strong style="color:${corValor};">${valorTexto}</strong>
             `;
 
             div.onclick = () => selecionarPedido(p);
@@ -159,10 +224,8 @@ async function renderPedidos() {
 
     } catch (error) {
         console.error("Erro ao renderizar:", error);
-        lista.innerHTML = '<p style="color:white;">Erro de conexão com o servidor.</p>';
     }
 }
-
 /* ===== 3. SELECIONAR PEDIDO (Visualizar Detalhes) ===== */
 function selecionarPedido(pedido) {
     pedidoAtivo = pedido;
@@ -179,10 +242,11 @@ function selecionarPedido(pedido) {
 }
 
 // Função auxiliar para desenhar os itens do pedido selecionado
+// Função auxiliar para desenhar os itens do pedido selecionado
 function renderPedidoDetalhes() {
     const lista = document.getElementById('listaItens');
     lista.innerHTML = '';
-    let total = 0;
+    let totalCalculadoItens = 0;
 
     if (!pedidoAtivo || !pedidoAtivo.itens) {
         lista.innerHTML = '<p class="vazio">Sem itens</p>';
@@ -190,10 +254,9 @@ function renderPedidoDetalhes() {
     }
 
     pedidoAtivo.itens.forEach(i => {
-        // No banco, o nome do produto fica dentro do objeto 'produto'
         const nomeProd = i.produto ? i.produto.nome : 'Item';
         const sub = i.quantidade * i.precoUnitarioVenda;
-        total += sub;
+        totalCalculadoItens += sub;
 
         lista.innerHTML += `
             <div class="item">
@@ -207,8 +270,22 @@ function renderPedidoDetalhes() {
         lista.innerHTML = '<p class="vazio">Nenhum item adicionado</p>';
     }
 
-    // Atualiza o total visual
-    document.getElementById('pedidoTotal').innerText = total.toFixed(2);
+    // --- LÓGICA DE EXIBIÇÃO DO SALDO ---
+    const elementoTotal = document.getElementById('pedidoTotal');
+    const valorJaPago = pedidoAtivo.valorJaPago || 0;
+    const saldoDevedor = totalCalculadoItens - valorJaPago;
+
+    if (valorJaPago > 0) {
+        // Se já pagou algo, mostra detalhado
+        elementoTotal.innerHTML = `
+            <span style="font-size: 0.6em; color: #ccc; text-decoration: line-through;">Total: R$ ${totalCalculadoItens.toFixed(2)}</span><br>
+            <span style="font-size: 0.7em; color: #4caf50;">Pago: - R$ ${valorJaPago.toFixed(2)}</span><br>
+            <span style="color: #ff5722;">Falta: R$ ${saldoDevedor.toFixed(2)}</span>
+        `;
+    } else {
+        // Se não pagou nada ainda, mostra normal
+        elementoTotal.innerText = totalCalculadoItens.toFixed(2);
+    }
 }
 
 /* ===== 4. ADICIONAR ITEM AO PEDIDO (CONECTADO À API) ===== */
@@ -472,43 +549,37 @@ function filtrarProdutos(tipo, botaoClicado) {
 }
 async function confirmarPagamento() {
     const metodo = document.getElementById('selectPagamento').value;
+    // Pega o valor digitado no input, não o total do pedido!
+    const valorPagoAgora = parseFloat(document.getElementById('inputValorPagar').value);
 
-    if (!metodo) {
-        alert("Selecione a forma de pagamento.");
-        return;
-    }
+    if (!metodo) return alert("Selecione a forma de pagamento.");
+    if (!valorPagoAgora || valorPagoAgora <= 0) return alert("Digite um valor válido.");
 
-    const total = pedidoAtivo.valorTotal;
+    // --- CÁLCULO DA TAXA (PROPORCIONAL AO QUE ESTÁ SENDO PAGO) ---
+    // Importante: Calculamos a taxa sobre os R$ 50,00 que ele pagou, não sobre os R$ 200,00 da conta.
     let valorTaxa = 0;
 
-    // --- AQUI ESTÁ A AUTOMAÇÃO (CONFIGURE SUAS PORCENTAGENS) ---
-    // Exemplo: 
-    // Crédito = 4.99% (0.0499)
-    // Débito = 1.99% (0.0199)
-    // Pix/Dinheiro = 0%
-
     if (metodo === 'CREDITO') {
-        valorTaxa = total * 0.035; // 5% de taxa
+        valorTaxa = valorPagoAgora * 0.0468; // 3.5% sobre o valor pago
     } 
     else if (metodo === 'DEBITO') {
-        valorTaxa = total * 0.015; // 2% de taxa
+        valorTaxa = valorPagoAgora * 0.0168; // 1.5% sobre o valor pago
     }
-    else {
-        valorTaxa = 0; // PIX e DINHEIRO não tem taxa
-    }
+    
+    // Confirmação Visual
+    const msg = `Confirmar pagamento de R$ ${valorPagoAgora.toFixed(2)} no ${metodo}?`;
+    if (!confirm(msg)) return;
 
-    // Pergunta de confirmação (mostra o valor final para o garçom conferir)
-    if (!confirm(`Confirmar pagamento de R$ ${total.toFixed(2)} no ${metodo}?`)) {
-        return;
-    }
-
-    // Empacota os dados para enviar ao Backend
+    // --- PACOTE PARA O BACKEND ---
+    // Agora mandamos o 'valorPago' explicitamente
     const payload = {
         metodo: metodo,
-        taxa: parseFloat(valorTaxa.toFixed(2)) // Envia a taxa calculada automaticamente
+        valorPago: valorPagoAgora, // <--- NOVO CAMPO
+        taxa: parseFloat(valorTaxa.toFixed(2))
     };
 
     try {
+        // ATENÇÃO: Seu Backend precisa estar preparado para receber 'valorPago'
         const response = await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/pagar`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -516,13 +587,13 @@ async function confirmarPagamento() {
         });
 
         if (response.ok) {
-            alert("Pagamento Realizado!");
+            alert("Pagamento registrado!");
             fecharModalPagamento();
             pedidoAtivo = null;
-            renderPedidos(); 
+            renderPedidos(); // Atualiza a lista (se foi parcial, o pedido continua lá mas com valor menor)
         } else {
-            const msg = await response.text();
-            alert("Erro ao processar: " + msg);
+            const msgErro = await response.text();
+            alert("Erro: " + msgErro);
         }
 
     } catch (error) {
@@ -530,7 +601,6 @@ async function confirmarPagamento() {
         alert("Erro de conexão.");
     }
 }
-
 async function pesquisarCliente(termo) {
     const dataList = document.getElementById('sugestoesClientes');
     const inputNome = document.getElementById('clienteNome');

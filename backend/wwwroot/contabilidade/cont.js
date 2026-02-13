@@ -191,7 +191,8 @@ function getBadge(metodo) {
 }
 
 async function recalcularTaxasAntigas() {
-    if (!confirm("Isso vai recalcular as taxas de TODOS os pedidos antigos baseados em:\nCrédito: 5%\nDébito: 2%\n\nDeseja continuar?")) return;
+    // Confirmação para evitar acidentes
+    if (!confirm("ATENÇÃO: Isso vai FORÇAR o recálculo de todas as taxas antigas para:\n\nCrédito: 3.5%\nDébito: 1.5%\n\nDeseja continuar?")) return;
 
     try {
         const res = await fetch(`${API_URL}/pedidos`);
@@ -202,30 +203,37 @@ async function recalcularTaxasAntigas() {
         // Varre pedido por pedido
         for (const p of pedidos) {
             
-            // Só interessa pedidos PAGOS e que a taxa esteja ZERADA (ou muito baixa)
-            if (p.status === 'PAGO' && (!p.taxaPagamento || p.taxaPagamento === 0)) {
+            // 1. Só interessa pedidos PAGOS ou PARCIAIS
+            // RETIREI A TRAVA QUE EXIGIA TAXA ZERO. Agora ele olha tudo.
+            if (p.status === 'PAGO' || p.status === 'PARCIAL') {
                 
                 let novaTaxa = 0;
-                const total = p.valorTotal;
+                const total = p.valorTotal; 
+                // Proteção para método nulo
                 const metodo = p.metodoPagamento ? p.metodoPagamento.toUpperCase() : '';
+                const taxaAtual = p.taxaPagamento || 0;
 
-                // --- REGRAS DE CÁLCULO (Mesmas do Pedido) ---
+                // --- NOVAS TAXAS (Ajuste aqui se precisar) ---
                 if (metodo.includes('CREDITO') || metodo.includes('CRÉDITO')) {
-                    novaTaxa = total * 0.05; // 5%
+                    novaTaxa = total * 0.0468; // 3.5%
                 } 
                 else if (metodo.includes('DEBITO') || metodo.includes('DÉBITO')) {
-                    novaTaxa = total * 0.02; // 2%
+                    novaTaxa = total * 0.0168; // 1.5%
                 }
 
-                // Se calculou alguma taxa, salva no banco
-                if (novaTaxa > 0) {
+                // --- O PULO DO GATO ---
+                // Verifica se a nova taxa é diferente da que está salva (diferença maior que 1 centavo)
+                // Isso evita chamadas desnecessárias no banco
+                if (novaTaxa > 0 && Math.abs(novaTaxa - taxaAtual) > 0.01) {
+                    
                     await fetch(`${API_URL}/pedidos/${p.id}/taxa`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(novaTaxa)
                     });
+                    
                     atualizados++;
-                    console.log(`Pedido #${p.id} atualizado: Taxa R$ ${novaTaxa.toFixed(2)}`);
+                    console.log(`Pedido #${p.id} (${metodo}) corrigido: De R$ ${taxaAtual} para R$ ${novaTaxa.toFixed(2)}`);
                 }
             }
         }

@@ -107,22 +107,71 @@ namespace Espeto.Controllers
 
         // PUT: api/pedidos/5/pagar (MÉTODO CORRIGIDO - SEM DUPLICIDADE)
         [HttpPut("{id}/pagar")]
-        public async Task<IActionResult> ConfirmarPagamento(int id, [FromBody] DadosPagamentoDto dados)
-        {
-            var pedido = await _context.Pedidos.FindAsync(id);
-            if (pedido == null) return NotFound();
+public async Task<IActionResult> ConfirmarPagamento(int id, [FromBody] DadosPagamentoDto dados)
+{
+    // 1. Busca o pedido (Incluindo pagamentos se você tiver criado a tabela, senão só o pedido)
+    var pedido = await _context.Pedidos.FindAsync(id);
+    
+    if (pedido == null) return NotFound();
 
-            if (string.IsNullOrEmpty(dados.Metodo)) 
-                return BadRequest("Informe o método de pagamento.");
+    if (string.IsNullOrEmpty(dados.Metodo)) 
+        return BadRequest("Informe o método de pagamento.");
 
-            pedido.Status = "PAGO";
-            pedido.MetodoPagamento = dados.Metodo;
-            pedido.DataPagamento = DateTime.Now;
-            pedido.TaxaPagamento = dados.Taxa; // Salva a taxa aqui
-            
-            await _context.SaveChangesAsync();
-            return Ok(new { mensagem = "Pedido pago com sucesso!" });
-        }
+    if (dados.ValorPago <= 0)
+        return BadRequest("O valor do pagamento deve ser maior que zero.");
+
+    // 2. Verifica se o valor faz sentido (não pode pagar mais do que deve)
+    decimal saldoRestante = pedido.ValorTotal - pedido.ValorJaPago;
+    
+    // Pequena margem de erro (0.01) para evitar problemas de arredondamento
+    if (dados.ValorPago > (saldoRestante + 0.01m))
+        return BadRequest($"Valor superior ao restante! Falta apenas: {saldoRestante:C}");
+
+    // --- LÓGICA DE ATUALIZAÇÃO ---
+
+    // A. Atualiza quanto já foi pago
+    pedido.ValorJaPago += dados.ValorPago;
+
+    // B. TRUQUE DA CONTABILIDADE: Acumula a taxa
+    // Se ele pagou R$ 50 de taxa R$ 2,00 agora, soma +2 na taxa do pedido.
+    // Assim sua tabela de contabilidade vai mostrar o total de taxas descontadas.
+    pedido.TaxaPagamento += dados.Taxa;
+
+    // C. Registra o último método usado (ou concatena se preferir, ex: "CREDITO/DEBITO")
+    pedido.MetodoPagamento = dados.Metodo; 
+    
+    // D. IMPORTANTE: Salvar na tabela de Histórico de Pagamentos (Se você criou a tabela nova)
+    // Se não criou a tabela Pagamento, pule esta parte, mas recomendo fortemente criar.
+    var historico = new Pagamento 
+    {
+        PedidoId = pedido.Id,
+        Valor = dados.ValorPago,
+        Metodo = dados.Metodo,
+        Taxa = dados.Taxa,
+        DataHora = DateTime.Now
+    };
+    _context.Pagamentos.Add(historico);
+    // -------------------------------------------------------------------------------
+
+    // 3. Verifica se quitou a dívida
+    if (pedido.ValorJaPago >= (pedido.ValorTotal - 0.01m))
+    {
+        pedido.Status = "PAGO";
+        pedido.DataPagamento = DateTime.Now; // Data que finalizou tudo
+    }
+    else
+    {
+        pedido.Status = "PARCIAL"; // Status novo para indicar que falta dinheiro
+    }
+    
+    await _context.SaveChangesAsync();
+
+    return Ok(new { 
+        mensagem = "Pagamento registrado!", 
+        status = pedido.Status,
+        restante = pedido.ValorTotal - pedido.ValorJaPago
+    });
+}
 
         // [MÉTODOS DE GET POR CLIENTE, UPDATE E DELETE CONTINUAM AQUI EMBAIXO IGUAL ANTES]
         // ... (Para economizar espaço, mantive os principais. Se você apagou tudo, me avise que mando o resto) ...
@@ -209,6 +258,7 @@ namespace Espeto.Controllers
     }
     public class DadosPagamentoDto {
         public string Metodo { get; set; }
+        public decimal ValorPago { get; set; }
         public decimal Taxa { get; set; }
     }
 }

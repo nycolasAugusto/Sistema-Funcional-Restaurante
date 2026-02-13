@@ -126,13 +126,27 @@
 
 
     <div class="modal" id="modalPagamento">
-        <div class="modal-content" style="text-align: center;">
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
             <h3>Finalizar Pedido</h3>
-            <p>Total a Pagar: <strong style="font-size: 1.5em; color: green;">R$ <span
-                        id="valorPagarModal">0,00</span></strong></p>
+
+            <p style="margin-bottom: 5px; color: #666;">Total do Pedido: <span id="displayTotalOriginal">R$ 0,00</span>
+            </p>
+
+            <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <label
+                    style="display:block; text-align:left; font-size: 0.9em; font-weight:bold; margin-bottom: 5px;">Valor
+                    a Pagar Agora:</label>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span style="font-size: 1.2em; font-weight: bold; color: green;">R$</span>
+                    <input type="number" id="inputValorPagar" step="0.01"
+                        style="font-size: 1.5em; width: 100%; border: 1px solid #ccc; border-radius: 4px; padding: 5px; color: green; font-weight: bold;">
+                </div>
+                <small id="avisoRestante"
+                    style="display: block; text-align: left; color: #d9534f; margin-top: 5px; font-weight: bold;"></small>
+            </div>
 
             <label style="display:block; margin: 15px 0 5px; text-align:left;">Forma de Pagamento:</label>
-            <select id="selectPagamento" style="width: 100%; padding: 10px; margin-bottom: 20px;">
+            <select id="selectPagamento" style="width: 100%; padding: 10px; margin-bottom: 20px; font-size: 1.1em;">
                 <option value="">Selecione...</option>
                 <option value="PIX">Pix</option>
                 <option value="DINHEIRO">Dinheiro</option>
@@ -141,7 +155,7 @@
             </select>
 
             <div class="modal-botoes">
-                <button onclick="fecharModalPagamento()">Cancelar</button>
+                <button onclick="fecharModalPagamento()" style="background-color: #ccc; color: #333;">Cancelar</button>
                 <button class="btn-pagar" onclick="confirmarPagamento()">CONFIRMAR PAGAMENTO</button>
             </div>
         </div>

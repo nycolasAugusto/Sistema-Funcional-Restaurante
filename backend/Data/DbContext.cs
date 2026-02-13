@@ -14,6 +14,7 @@ namespace Espeto.Data
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<ItemPedido> ItensPedido { get; set; }
+        public DbSet<Pagamento> Pagamentos { get; set; }
 
         // Configuração mínima e global apenas para evitar bugs com Dinheiro
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
