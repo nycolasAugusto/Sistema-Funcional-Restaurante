@@ -104,6 +104,19 @@
                 <label>Valor de Venda (R$):</label>
                 <input type="number" id="valorVenda" step="0.01" required placeholder="0.00">
 
+                <div style="margin: 15px 0; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #856404;">
+                        <input type="checkbox" id="chkDerivado" onchange="toggleDerivado()" style="width: 20px; height: 20px;">
+                        <strong>Este produto é derivado? (Ex: Xixo)</strong>
+                    </label>
+
+                    <div id="areaProdutoPai" style="display: none; margin-top: 15px;">
+                        <label style="color: #856404;">Descontar estoque de qual Produto Base?</label>
+                        <select id="selProdutoPai" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ffeeba;">
+                            <option value="">Carregando produtos...</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="areaEstoqueInicial" class="box-destaque">
                     <p><strong>Estoque Inicial</strong></p>
                     <label>Quantidade:</label>
@@ -112,6 +125,7 @@
                     <label>Custo Unitário (R$):</label>
                     <input type="number" id="custoInicial" step="0.01">
                 </div>
+
 
                 <button type="submit" class="btn-salvar">Salvar Dados</button>
             </form>
@@ -129,7 +143,7 @@
                 <input type="hidden" id="estoqueProdId">
 
                 <label>Quantidade:</label>
-                <input type="number" id="novaQtd" required min="1" class="input-padrao full-width">
+                <input type="number" id="novaQtd"   min="1" class="input-padrao full-width">
 
                 <div id="divCustoEstoque">
                     <label>Valor pago por unidade (R$):</label>

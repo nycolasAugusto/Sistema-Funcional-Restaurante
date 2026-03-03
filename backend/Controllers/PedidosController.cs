@@ -49,7 +49,15 @@ namespace Espeto.Controllers
             {
                 var produto = await _context.Produtos.FindAsync(itemDto.ProdutoId);
                 if (produto == null) return BadRequest($"Produto {itemDto.ProdutoId} não encontrado.");
-                if (produto.SaldoEstoque < itemDto.Quantidade) return BadRequest($"Estoque insuficiente: {produto.Nome}");
+
+                // --- A MÁGICA DA FRALDINHA ---
+                // Verifica quem é o "Dono do Estoque". Se for derivado, pega o Pai. Se não, é ele mesmo.
+                var produtoEstoque = produto.ProdutoPaiId.HasValue 
+                    ? await _context.Produtos.FindAsync(produto.ProdutoPaiId.Value) 
+                    : produto;
+
+                if (produtoEstoque == null) return BadRequest("Produto base do estoque não encontrado.");
+                if (produtoEstoque.SaldoEstoque < itemDto.Quantidade) return BadRequest($"Estoque insuficiente. Faltam peças na base de: {produto.Nome}");
 
                 var novoItem = new ItemPedido
                 {
@@ -62,9 +70,13 @@ namespace Espeto.Controllers
                 };
 
                 totalPedido += (novoItem.PrecoUnitarioVenda * (decimal)novoItem.Quantidade);
-                produto.SaldoEstoque -= itemDto.Quantidade;
+                
+                // Desconta do dono do estoque (Pai ou Ele mesmo)
+                produtoEstoque.SaldoEstoque -= itemDto.Quantidade;
+                
                 pedido.Itens.Add(novoItem);
             }
+
 
             pedido.ValorTotal = totalPedido;
             _context.Pedidos.Add(pedido);
@@ -77,16 +89,27 @@ namespace Espeto.Controllers
         [HttpPost("{id}/itens")]
         public async Task<IActionResult> AdicionarItemAoPedido(int id, [FromBody] ItemPedidoDto itemDto)
         {
+            // --- 1. ESSAS TRÊS LINHAS FALTARAM NO MEU CÓDIGO ANTERIOR ---
             var pedido = await _context.Pedidos.Include(p => p.Itens).FirstOrDefaultAsync(p => p.Id == id);
             if (pedido == null) return NotFound("Pedido não encontrado.");
             if (pedido.Status == "PAGO" || pedido.Status == "CANCELADO") return BadRequest("Pedido fechado.");
 
+            // --- 2. BUSCA O PRODUTO ---
             var produto = await _context.Produtos.FindAsync(itemDto.ProdutoId);
             if (produto == null) return BadRequest("Produto não existe.");
-            if (produto.SaldoEstoque < itemDto.Quantidade) return BadRequest($"Estoque insuficiente.");
 
-            produto.SaldoEstoque -= itemDto.Quantidade;
+            // --- 3. A MÁGICA DO ESTOQUE (FRALDINHA) ---
+            var produtoEstoque = produto.ProdutoPaiId.HasValue 
+                ? await _context.Produtos.FindAsync(produto.ProdutoPaiId.Value) 
+                : produto;
 
+            if (produtoEstoque == null) return BadRequest("Produto base do estoque não encontrado.");
+            if (produtoEstoque.SaldoEstoque < itemDto.Quantidade) return BadRequest($"Estoque insuficiente na base.");
+
+            // Desconta do dono do estoque
+            produtoEstoque.SaldoEstoque -= itemDto.Quantidade;
+
+            // --- 4. CRIA E ADICIONA O ITEM ---
             var novoItem = new ItemPedido
             {
                 PedidoId = id,
@@ -198,11 +221,18 @@ public async Task<IActionResult> ConfirmarPagamento(int id, [FromBody] DadosPaga
             
             double diferenca = dto.Quantidade - item.Quantidade;
 
+            // --- A MÁGICA DA FRALDINHA NA EDIÇÃO ---
+            var produtoEstoque = item.Produto!.ProdutoPaiId.HasValue 
+                ? await _context.Produtos.FindAsync(item.Produto.ProdutoPaiId.Value) 
+                : item.Produto;
+
+            if (produtoEstoque == null) return BadRequest("Produto base do estoque não encontrado.");
+
             if (diferenca > 0) {
-                if (item.Produto.SaldoEstoque < diferenca) return BadRequest($"Estoque insuficiente.");
-                item.Produto.SaldoEstoque -= diferenca;
+                if (produtoEstoque.SaldoEstoque < diferenca) return BadRequest($"Estoque insuficiente na base.");
+                produtoEstoque.SaldoEstoque -= diferenca; // Tira do pai
             } else if (diferenca < 0) {
-                item.Produto.SaldoEstoque += Math.Abs(diferenca); 
+                produtoEstoque.SaldoEstoque += Math.Abs(diferenca); // Devolve pro pai
             }
 
             pedido.ValorTotal -= ((decimal)item.Quantidade * item.PrecoUnitarioVenda);
@@ -213,7 +243,6 @@ public async Task<IActionResult> ConfirmarPagamento(int id, [FromBody] DadosPaga
             await _context.SaveChangesAsync();
             return Ok(new { mensagem = "Atualizado!", novoTotal = pedido.ValorTotal });
         }
-
                 // PUT: api/pedidos/5/taxa
         [HttpPut("{id}/taxa")]
         public async Task<IActionResult> AtualizarTaxa(int id, [FromBody] decimal novaTaxa)
@@ -227,14 +256,25 @@ public async Task<IActionResult> ConfirmarPagamento(int id, [FromBody] DadosPaga
             return Ok();
         }
 
-        [HttpDelete("{pedidoId}/itens/{itemId}")]
+       [HttpDelete("{pedidoId}/itens/{itemId}")]
         public async Task<IActionResult> RemoverItemDoPedido(int pedidoId, int itemId)
         {
             var item = await _context.ItensPedido.Include(i => i.Produto).FirstOrDefaultAsync(i => i.Id == itemId && i.PedidoId == pedidoId);
             if (item == null) return NotFound("Item não encontrado.");
             var pedido = await _context.Pedidos.FindAsync(pedidoId);
             
-            if (item.Produto != null) item.Produto.SaldoEstoque += item.Quantidade;
+            // --- A MÁGICA DA FRALDINHA NA EXCLUSÃO ---
+            if (item.Produto != null) 
+            {
+                var produtoEstoque = item.Produto!.ProdutoPaiId.HasValue 
+                    ? await _context.Produtos.FindAsync(item.Produto.ProdutoPaiId.Value) 
+                    : item.Produto;
+
+                if (produtoEstoque != null) 
+                {
+                    produtoEstoque.SaldoEstoque += item.Quantidade; // Devolve o estoque pro pai
+                }
+            }
 
             pedido.ValorTotal -= ((decimal)item.Quantidade * item.PrecoUnitarioVenda);
             if (pedido.ValorTotal < 0) pedido.ValorTotal = 0;

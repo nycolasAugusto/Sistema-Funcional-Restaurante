@@ -11,5 +11,7 @@ namespace Espeto.Models
         
         public double SaldoEstoque { get; set; }
         public bool Ativo { get; set; }
+        
+        public int? ProdutoPaiId { get; set; }
     }
 }

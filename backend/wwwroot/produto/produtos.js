@@ -152,31 +152,62 @@ function abrirEstoque(id, tipo) {
 
 // 4. Salvar Produto (Create / Update)
 async function salvarProduto(e) {
-    e.preventDefault();
-    
-    const id = document.getElementById('prodId').value;
-    const campoTipo = document.getElementById('novoTipo');
-    const checkAtivo = document.getElementById('produtoAtivo');
-    const estaAtivo = checkAtivo ? checkAtivo.checked : true;
-
-    const dados = {
-        id: id ? parseInt(id) : 0,
-        nome: document.getElementById('nome').value,
-        tipo: campoTipo.value,
-        valorVenda: parseFloat(document.getElementById('valorVenda').value),
-        ativo: estaAtivo
-    };
-
-    if (!id) {
-        dados.saldoEstoque = parseInt(document.getElementById('qtdInicial').value);
-        dados.custoMedio = parseFloat(document.getElementById('custoInicial').value);
-        dados.ativo = true; 
-    }
+    e.preventDefault(); 
+    console.log("PASSO 1: Botão clicado! Iniciando salvamento...");
 
     try {
-        const metodo = id ? 'PUT' : 'POST';
-        const url = id ? `${API_URL}/produto/${id}` : `${API_URL}/produto`;
+        const id = document.getElementById('prodId')?.value;
+        const nome = document.getElementById('nome')?.value;
+        const campoTipo = document.getElementById('novoTipo')?.value;
+        const valorVenda = document.getElementById('valorVenda')?.value;
         
+        const checkAtivo = document.getElementById('produtoAtivo');
+        const estaAtivo = checkAtivo ? checkAtivo.checked : true;
+
+        console.log("PASSO 2: Dados básicos lidos da tela.");
+
+        // --- LÊ A CAIXINHA DE DERIVADO ---
+        const chkDerivado = document.getElementById('chkDerivado');
+        const isDerivado = chkDerivado ? chkDerivado.checked : false;
+        let paiId = null;
+
+        if (isDerivado) {
+            paiId = document.getElementById('selProdutoPai')?.value;
+            if (!paiId) {
+                alert("Selecione o produto base de onde sairá o estoque!");
+                return;
+            }
+        }
+
+        console.log("PASSO 3: Validação do produto derivado passou.");
+
+        // --- MONTA OS DADOS ---
+        const dados = {
+            id: id ? parseInt(id) : 0,
+            nome: nome,
+            tipo: campoTipo,
+            valorVenda: parseFloat(valorVenda || 0),
+            ativo: estaAtivo,
+            produtoPaiId: paiId ? parseInt(paiId) : null
+        };
+
+        // Se for produto novo, pega estoque e custo
+        if (!id || id === "0" || id === "") {
+            const elQtd = document.getElementById('qtdInicial');
+            const elCusto = document.getElementById('custoInicial');
+            
+            dados.saldoEstoque = isDerivado ? 0 : parseInt(elQtd?.value || 0);
+            dados.custoMedio = parseFloat(elCusto?.value || 0);
+        }
+
+        console.log("PASSO 4: Objeto pronto para enviar pro C#:", dados);
+
+        // --- ENVIA PARA O SERVIDOR ---
+        const metodo = dados.id ? 'PUT' : 'POST';
+        const url = dados.id ? `${API_URL}/produto/${dados.id}` : `${API_URL}/produto`;
+        
+        console.log(`PASSO 5: Fazendo requisição ${metodo} para a URL: ${url}`);
+
         const response = await fetch(url, {
             method: metodo,
             headers: { 'Content-Type': 'application/json' },
@@ -189,14 +220,15 @@ async function salvarProduto(e) {
             carregarProdutos(); 
         } else {
             const erroTexto = await response.text();
-            alert("Erro ao salvar: " + erroTexto);
+            alert("ERRO DO BACKEND (C#):\n" + erroTexto);
+            console.error("Erro do Backend:", erroTexto);
         }
-    } catch (err) { 
-        console.error(err);
-        alert("Erro de conexão.");
+
+    } catch (erroGrave) { 
+        console.error("❌ ERRO GRAVE NO JAVASCRIPT:", erroGrave);
+        alert("Ocorreu um erro na tela. Abra o F12 e veja a aba Console!");
     }
 }
-
 // 5. Salvar Estoque (Lógica Negativa na Saída)
 async function salvarEstoque(e) {
     e.preventDefault();
@@ -230,6 +262,36 @@ async function salvarEstoque(e) {
             alert("Erro ao movimentar estoque.");
         }
     } catch (error) { console.error(error); }
+
+}
+function toggleDerivado() {
+    const isDerivado = document.getElementById('chkDerivado').checked;
+    const areaPai = document.getElementById('areaProdutoPai');
+    const areaEstoque = document.getElementById('areaEstoqueInicial');
+
+    if (isDerivado) {
+        areaPai.style.display = 'block';
+        if(areaEstoque) areaEstoque.style.display = 'none'; // Filho não tem estoque inicial
+        carregarSelectPais();
+    } else {
+        areaPai.style.display = 'none';
+        if(areaEstoque) areaEstoque.style.display = 'block';
+    }
+}
+
+// Preenche o Select apenas com produtos que NÃO SÃO derivados (Os Pais)
+function carregarSelectPais() {
+    const select = document.getElementById('selProdutoPai');
+    select.innerHTML = '<option value="">Selecione a base...</option>';
+
+    if(typeof listaGlobalProdutos !== 'undefined') {
+        listaGlobalProdutos.forEach(p => {
+            // Só lista se for ativo e NÃO tiver um pai (para não virar uma bagunça)
+            if (p.ativo && !p.produtoPaiId) {
+                select.innerHTML += `<option value="${p.id}">${p.nome} (Estoque: ${p.saldoEstoque})</option>`;
+            }
+        });
+    }
 }
 
 // Iniciar
