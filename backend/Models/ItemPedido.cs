@@ -14,12 +14,12 @@ namespace Espeto.Models
         public Produto Produto { get; set; }
 
         public double Quantidade { get; set; }
-
         // Por quanto vendeu (Preço do Cardápio na época)
         public decimal PrecoUnitarioVenda { get; set; }
 
         // --- NOVO ---
         // Quanto custou pro dono (Custo Médio na época)
         public decimal CustoUnitario { get; set; }
+        public bool FoiImpresso { get; set; } = false;
     }
 }

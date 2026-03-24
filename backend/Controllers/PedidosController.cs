@@ -210,7 +210,22 @@ public async Task<IActionResult> ConfirmarPagamento(int id, [FromBody] DadosPaga
                 .OrderByDescending(p => p.DataPedido)
                 .ToListAsync();
         }
+                // PUT: api/pedidos/5/marcarImpresso
+        [HttpPut("{id}/marcarImpresso")]
+        public async Task<IActionResult> MarcarItensComoImpressos(int id)
+        {
+            var itens = await _context.ItensPedido
+                .Where(i => i.PedidoId == id && !i.FoiImpresso)
+                .ToListAsync();
 
+            if (!itens.Any()) return Ok(new { mensagem = "Nenhum item novo para marcar." });
+
+            foreach (var item in itens)
+                item.FoiImpresso = true;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { mensagem = $"{itens.Count} item(ns) marcado(s) como impresso(s)." });
+        }
         [HttpPut("{pedidoId}/itens/{itemId}")]
         public async Task<IActionResult> AtualizarItemPedido(int pedidoId, int itemId, [FromBody] ItemPedidoDto dto)
         {

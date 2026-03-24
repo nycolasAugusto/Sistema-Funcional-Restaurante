@@ -500,20 +500,29 @@ button {
 .btn-atalho:hover {
     background-color: #d4ac0d;
 }
+.btn-fechar { background: #6f42c1; color: white; }
 
 /* ==================================================
-   IMPRESSÃO TÉRMICA - SOLUÇÃO DEFINITIVA (SEM CORTES)
+   IMPRESSÃO TÉRMICA - VERSÃO CORRIGIDA
    ================================================== */
 @media print {
-    
-    /* 1. CONFIGURAÇÃO DA FOLHA (Rolo contínuo) */
+
+    /* 1. PÁGINA — testa 58mm primeiro, se cortar troca para 80mm */
     @page {
-        margin: 0;
-        size: 58mm auto; 
+        margin: 0mm;
+        padding: 0mm;
+        size: 58mm auto; /* Troque para 80mm se necessário */
     }
 
-    /* 2. LIMPA TUDO (Reset Geral) */
+    /* 2. RESET GERAL — zera tudo */
+    * {
+        box-sizing: border-box !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
     html, body {
+        width: 58mm !important;   /* Mesmo valor do size acima */
         height: auto !important;
         overflow: visible !important;
         margin: 0 !important;
@@ -521,90 +530,262 @@ button {
         background: #fff !important;
     }
 
-    /* Oculta tudo na página por padrão */
+    /* 3. ESCONDE TUDO por padrão */
     body * {
         visibility: hidden;
     }
 
-    /* 3. POSICIONA A COMANDA NO TOPO */
+    /* 4. MOSTRA SÓ A COMANDA */
     .pedido-info {
-        /* Torna visível apenas a comanda */
-        visibility: visible;
-        
-        /* Tira ela do lugar original e cola no topo do papel */
-        position: absolute;
-        left: 0;
-        top: 0;
-        
-        /* Força largura total do papel */
-        width: 100% !important;
-        max-width: 58mm !important; 
-        
-        /* IMPORTANTE: Remove bordas e sombras do card */
+        visibility: visible !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 58mm !important;    /* Mesmo valor do size acima */
+        max-width: 58mm !important;
+
+        /* Remove visual de card */
         box-shadow: none !important;
         border: none !important;
+        border-radius: 0 !important;
         background: white !important;
         margin: 0 !important;
-        padding: 0 !important;
-        padding-bottom: 60px !important; /* Espaço extra no final para corte */
-    }
+        padding: 2mm !important;
 
-    /* Torna visível tudo que está DENTRO da comanda */
-    .pedido-info * {
-        visibility: visible;
-    }
-
-    /* 4. O PULO DO GATO: DESTRAVAR A LISTA DE ITENS */
-    /* Isso remove a barra de rolagem e força a lista a crescer */
-    #listaItens, .itens-pedido {
-        display: block !important;
-        
-        /* ANULA qualquer limite de altura da tela */
-        max-height: none !important; 
+        /* CRÍTICO: deixa crescer sem limite */
         height: auto !important;
-        min-height: auto !important;
-        
-        /* ANULA a barra de rolagem */
-        overflow: visible !important; 
-        
-        /* Remove bordas internas */
-        border: none !important;
+        min-height: 0 !important;
+        overflow: visible !important;
     }
 
-    /* 5. AJUSTES VISUAIS (FONTE E CORES) */
-    .pedido-info h3, 
-    .pedido-info p, 
-    .pedido-info strong, 
-    .pedido-info span, 
+    .pedido-info * {
+        visibility: visible !important;
+    }
+
+    /* 5. LISTA DE ITENS — destrava o scroll e altura */
+    #listaItens,
+    .itens-pedido {
+        display: block !important;
+        max-height: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 6. EVITA CORTE NO MEIO DO ITEM — a chave do problema */
+    .item {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 2px 0 !important;
+        border-bottom: 1px dashed #000 !important;
+        width: 100% !important;
+    }
+
+    /* 7. TIPOGRAFIA — fonte de recibo, tamanho legível */
+    .pedido-info h3,
+    .pedido-info p,
+    .pedido-info strong,
+    .pedido-info span,
     .pedido-info div {
         color: black !important;
-        font-family: 'Courier New', monospace !important; /* Fonte de recibo */
-        font-size: 11px !important; /* Tamanho seguro para 58mm */
-        line-height: 1.2 !important;
+        font-family: 'Courier New', monospace !important;
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+        word-break: break-word !important; /* Evita texto sair da margem */
+        white-space: normal !important;
     }
 
-    /* Cabeçalho do Pedido */
+    /* Cabeçalho da comanda */
     .pedido-info h3 {
-        font-size: 14px !important;
+        font-size: 13px !important;
         font-weight: bold !important;
-        text-align: center;
-        border-bottom: 1px dashed #000;
-        padding-bottom: 5px;
-        margin-bottom: 10px;
+        text-align: center !important;
+        border-bottom: 1px dashed #000 !important;
+        padding-bottom: 4px !important;
+        margin: 0 0 6px 0 !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+    }
+
+    /* Linha do cliente */
+    .pedido-info p {
+        margin: 2px 0 !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
     }
 
     /* Total */
     .pedido-info .total {
-        margin-top: 15px;
-        padding-top: 5px;
-        border-top: 1px dashed #000;
-        text-align: right;
-        font-size: 14px !important;
+        margin-top: 6px !important;
+        padding-top: 4px !important;
+        border-top: 2px dashed #000 !important;
+        text-align: right !important;
+        font-size: 13px !important;
         font-weight: bold !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+
+        /* Espaço após o total para a guilhotina não cortar */
+        padding-bottom: 20mm !important;
     }
-    
-    /* 6. REMOVER BOTÕES E FILTROS QUE POSSAM APARECER */
-    .acoes, .btn-novo, .filtros-categoria, .adicionar-itens, button, .linha-topo > *:not(.pedido-info) {
+
+    /* 8. ESCONDE TUDO QUE NÃO É COMANDA */
+    header,
+    .acoes,
+    .adicionar-itens,
+    .pedidos-grid,
+    section:not(:first-child),
+    .modal,
+    button,
+    nav,
+    .linha-topo > *:not(.pedido-info) {
         display: none !important;
+        visibility: hidden !important;
+    }
+}
+/* ==================================================
+   MOBILE - RESPONSIVO COMPLETO
+   ================================================== */
+@media (max-width: 768px) {
+
+    /* HEADER */
+    .topo {
+        padding: 0 15px;
+        height: 55px;
+    }
+
+    .topo .logo {
+        font-size: 1rem;
+    }
+
+    /* CONTAINER GERAL */
+    .container {
+        padding: 10px;
+    }
+
+    /* LINHA TOPO: empilha as duas colunas */
+    .linha-topo {
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* CARD DO PEDIDO: largura total */
+    .pedido-info {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* LISTA DE ITENS: altura menor no mobile */
+    .itens-pedido {
+        max-height: 150px;
+    }
+
+    /* CARD ADICIONAR ITENS: largura total */
+    .adicionar-itens {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* FILTROS: scroll horizontal em vez de quebrar linha */
+    .filtros-categoria {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        gap: 6px;
+        /* Esconde a barra de scroll visual */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .filtros-categoria::-webkit-scrollbar {
+        display: none;
+    }
+
+    .btn-filtro {
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+    }
+
+    /* CONTROLES: select + qtd + botão em coluna */
+    .controles-pedido {
+        flex-direction: column;
+        height: auto;
+        gap: 8px;
+    }
+
+    #selectProduto {
+        width: 100%;
+        height: 44px;
+    }
+
+    #qtdPedido {
+        width: 100%;
+        height: 44px;
+        text-align: left;
+        padding: 0 15px;
+    }
+
+    .btn-add {
+        width: 100%;
+        height: 44px;
+        padding: 0;
+    }
+
+    /* BOTÕES DE AÇÃO */
+    .acoes {
+        display: grid;
+        /* 3 colunas: Comanda | Fechar Conta | Novo Pedido */
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        margin: 10px 0;
+        justify-content: stretch;
+    }
+
+    .acoes button {
+        padding: 10px 5px;
+        font-size: 0.82rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    /* ESCONDE Pagar e Editar no mobile */
+    .btn-pagar,
+    .btn-editar {
+        display: none !important;
+    }
+
+    /* GRID DE PEDIDOS: 2 colunas no mobile */
+    .pedidos-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .pedido-card {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    /* MODAL: ocupa a tela toda no mobile */
+    .modal-content {
+        width: 92vw;
+        max-width: 92vw;
+        padding: 18px;
+        box-sizing: border-box;
+    }
+
+    /* ATALHOS DO CHOPP: empilha os botões */
+    #atalhosChopp {
+        flex-direction: column !important;
+    }
+
+    .btn-atalho {
+        width: 100%;
     }
 }

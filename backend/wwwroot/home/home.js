@@ -1,5 +1,5 @@
 // --- CONFIGURAÇÃO ---
-const SENHA_CORRETA = "1234"; 
+const SENHA_CORRETA = "2026.ESPETo"; 
 
 function irParaComanda() {
     // Redireciona para a pasta de comandas
