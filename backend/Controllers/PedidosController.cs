@@ -16,6 +16,37 @@ namespace Espeto.Controllers
             _context = context;
         }
 
+        [HttpPut("{id}/alterar-cliente")]
+        public async Task<IActionResult> AlterarNomeCliente(int id, [FromBody]AlterarNomeClienteDto dados)
+        {
+            // Usamos o Include para puxar os dados do Cliente junto com o Pedido
+            var pedido = await _context.Pedidos
+                                    .Include(p => p.Cliente) 
+                                    .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (pedido == null) 
+                return NotFound("Pedido não encontrado.");
+
+            if (string.IsNullOrWhiteSpace(dados.Nome))
+                return BadRequest("O nome não pode ser vazio.");
+
+            // Atualiza o nome do cliente vinculado ao pedido
+            if (pedido.Cliente != null)
+            {
+                pedido.Cliente.Nome = dados.Nome;
+            }
+            else
+            {
+                // Caso, por algum motivo bizarro, o pedido não tenha um cliente associado ainda
+                return BadRequest("Este pedido não possui um cliente associado para alterar.");
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensagem = "Nome atualizado!" });
+        }
+
+
         // GET: api/pedidos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Pedido>>> GetPedidos()
@@ -132,16 +163,32 @@ namespace Espeto.Controllers
         [HttpPut("{id}/pagar")]
 public async Task<IActionResult> ConfirmarPagamento(int id, [FromBody] DadosPagamentoDto dados)
 {
-    // 1. Busca o pedido (Incluindo pagamentos se você tiver criado a tabela, senão só o pedido)
+    // 1. Busca o pedido
     var pedido = await _context.Pedidos.FindAsync(id);
     
     if (pedido == null) return NotFound();
 
+    // --- NOVA TRAVA DE SEGURANÇA ---
+    // Impede o pagamento de pedidos que já foram liquidados ou cancelados
+    if (pedido.Status == "PAGO" || pedido.Status == "Cancelado")
+    {
+        return BadRequest("Este pedido já foi finalizado e não pode receber novos pagamentos.");
+    }
+
     if (string.IsNullOrEmpty(dados.Metodo)) 
         return BadRequest("Informe o método de pagamento.");
 
-    if (dados.ValorPago <= 0)
-        return BadRequest("O valor do pagamento deve ser maior que zero.");
+    // --- CORREÇÃO DO VALOR ZERO ---
+    // Não permite valores negativos, mas agora ACEITA zero!
+    if (dados.ValorPago < 0)
+        return BadRequest("O valor do pagamento não pode ser negativo.");
+
+    // Se a comanda é de R$ 0,00, força a transação a ser zero para não desregular o caixa
+    if (pedido.ValorTotal == 0)
+    {
+        dados.ValorPago = 0;
+        dados.Taxa = 0;
+    }
 
     // 2. Verifica se o valor faz sentido (não pode pagar mais do que deve)
     decimal saldoRestante = pedido.ValorTotal - pedido.ValorJaPago;
@@ -152,19 +199,12 @@ public async Task<IActionResult> ConfirmarPagamento(int id, [FromBody] DadosPaga
 
     // --- LÓGICA DE ATUALIZAÇÃO ---
 
-    // A. Atualiza quanto já foi pago
+    // A. Atualiza quanto já foi pago e as taxas
     pedido.ValorJaPago += dados.ValorPago;
-
-    // B. TRUQUE DA CONTABILIDADE: Acumula a taxa
-    // Se ele pagou R$ 50 de taxa R$ 2,00 agora, soma +2 na taxa do pedido.
-    // Assim sua tabela de contabilidade vai mostrar o total de taxas descontadas.
     pedido.TaxaPagamento += dados.Taxa;
-
-    // C. Registra o último método usado (ou concatena se preferir, ex: "CREDITO/DEBITO")
     pedido.MetodoPagamento = dados.Metodo; 
     
-    // D. IMPORTANTE: Salvar na tabela de Histórico de Pagamentos (Se você criou a tabela nova)
-    // Se não criou a tabela Pagamento, pule esta parte, mas recomendo fortemente criar.
+    // B. Salvar na tabela de Histórico de Pagamentos
     var historico = new Pagamento 
     {
         PedidoId = pedido.Id,
@@ -174,23 +214,23 @@ public async Task<IActionResult> ConfirmarPagamento(int id, [FromBody] DadosPaga
         DataHora = DateTime.Now
     };
     _context.Pagamentos.Add(historico);
-    // -------------------------------------------------------------------------------
 
     // 3. Verifica se quitou a dívida
+    // Como a comanda é zero, 0 >= (0 - 0.01), então ele entra na regra de "PAGO" direto.
     if (pedido.ValorJaPago >= (pedido.ValorTotal - 0.01m))
     {
         pedido.Status = "PAGO";
-        pedido.DataPagamento = DateTime.Now; // Data que finalizou tudo
+        pedido.DataPagamento = DateTime.Now; 
     }
     else
     {
-        pedido.Status = "PARCIAL"; // Status novo para indicar que falta dinheiro
+        pedido.Status = "PARCIAL"; 
     }
     
     await _context.SaveChangesAsync();
 
     return Ok(new { 
-        mensagem = "Pagamento registrado!", 
+        mensagem = "Pagamento registrado com sucesso!", 
         status = pedido.Status,
         restante = pedido.ValorTotal - pedido.ValorJaPago
     });
@@ -298,6 +338,13 @@ public async Task<IActionResult> ConfirmarPagamento(int id, [FromBody] DadosPaga
             await _context.SaveChangesAsync();
             return Ok(new { mensagem = "Removido!" });
         }
+    }
+    // 1. Crie este DTO (pode ser no final do arquivo ou junto com os outros DTOs)
+
+// 2. Adicione a rota no Controller
+    public class AlterarNomeClienteDto 
+    {
+        public string Nome { get; set; }
     }
     
 

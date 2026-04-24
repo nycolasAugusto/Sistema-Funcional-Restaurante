@@ -33,10 +33,7 @@ function abrirModalPagamento() {
     const saldoDevedor = totalOriginal - jaPago;
 
     // Se já está tudo pago (proteção extra)
-    if (saldoDevedor <= 0.01) {
-        alert("Este pedido já está totalmente pago!");
-        return;
-    }
+    
 
     // --- 2. ATUALIZA A TELA ---
 
@@ -549,37 +546,37 @@ function filtrarProdutos(tipo, botaoClicado) {
 }
 async function confirmarPagamento() {
     const metodo = document.getElementById('selectPagamento').value;
-    // Pega o valor digitado no input, não o total do pedido!
     const valorPagoAgora = parseFloat(document.getElementById('inputValorPagar').value);
 
     if (!metodo) return alert("Selecione a forma de pagamento.");
-    if (!valorPagoAgora || valorPagoAgora <= 0) return alert("Digite um valor válido.");
+    
+    // --- CORREÇÃO DO ZERO ---
+    // isNaN verifica se o campo está vazio. Agora bloqueia negativo, mas deixa o 0 passar.
+    if (isNaN(valorPagoAgora) || valorPagoAgora < 0) {
+        return alert("Digite um valor numérico válido.");
+    }
 
-    // --- CÁLCULO DA TAXA (PROPORCIONAL AO QUE ESTÁ SENDO PAGO) ---
-    // Importante: Calculamos a taxa sobre os R$ 50,00 que ele pagou, não sobre os R$ 200,00 da conta.
+    // --- CÁLCULO DA TAXA ---
     let valorTaxa = 0;
 
     if (metodo === 'CREDITO') {
-        valorTaxa = valorPagoAgora * 0.0468; // 3.5% sobre o valor pago
+        valorTaxa = valorPagoAgora * 0.0468; 
     }
     else if (metodo === 'DEBITO') {
-        valorTaxa = valorPagoAgora * 0.0168; // 1.5% sobre o valor pago
+        valorTaxa = valorPagoAgora * 0.0168; 
     }
 
-    // Confirmação Visual
     const msg = `Confirmar pagamento de R$ ${valorPagoAgora.toFixed(2)} no ${metodo}?`;
     if (!confirm(msg)) return;
 
     // --- PACOTE PARA O BACKEND ---
-    // Agora mandamos o 'valorPago' explicitamente
     const payload = {
         metodo: metodo,
-        valorPago: valorPagoAgora, // <--- NOVO CAMPO
+        valorPago: valorPagoAgora, 
         taxa: parseFloat(valorTaxa.toFixed(2))
     };
 
     try {
-        // ATENÇÃO: Seu Backend precisa estar preparado para receber 'valorPago'
         const response = await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/pagar`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -590,7 +587,7 @@ async function confirmarPagamento() {
             alert("Pagamento registrado!");
             fecharModalPagamento();
             pedidoAtivo = null;
-            renderPedidos(); // Atualiza a lista (se foi parcial, o pedido continua lá mas com valor menor)
+            renderPedidos(); 
         } else {
             const msgErro = await response.text();
             alert("Erro: " + msgErro);
@@ -598,7 +595,7 @@ async function confirmarPagamento() {
 
     } catch (error) {
         console.error(error);
-        alert("Erro de conexão.");
+        alert("Erro de conexão com o servidor.");
     }
 }
 async function pesquisarCliente(termo) {
@@ -827,6 +824,33 @@ function verificarSeEhChopp() {
     }
 }
 
+async function salvarNovoNomeCliente() {
+    const novoNome = document.getElementById('inputEditarNomeCliente').value;
+    
+    if (!novoNome || novoNome.trim() === '') {
+        return alert("Por favor, digite um nome válido.");
+    }
+
+    try {
+        // Envia um objeto JSON simples só com o nome
+        const response = await fetch(`${API_URL}/pedidos/${pedidoAtivo.id}/alterar-cliente`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome: novoNome })
+        });
+
+        if (response.ok) {
+            alert("Nome do cliente atualizado com sucesso!");
+            renderPedidos(); // Recarrega a tela para mostrar o novo nome no card
+        } else {
+            const erro = await response.text();
+            alert("Erro ao atualizar: " + erro);
+        }
+    } catch (error) {
+        console.error("Erro:", error);
+        alert("Erro de conexão.");
+    }
+}
 
 // INICIALIZAÇÃO
 document.addEventListener("DOMContentLoaded", () => {

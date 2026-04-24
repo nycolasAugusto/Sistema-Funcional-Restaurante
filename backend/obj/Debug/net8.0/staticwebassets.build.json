@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "f2xqfHZxuY1pR6APK8LuiCHUqZ2jeUbosRKCANNeEMs=",
+  "Hash": "EKbhnTO6RcOkYQc5E+Utc4t8Ng59kYUgSRvW61w82hY=",
   "Source": "Espeto",
   "BasePath": "_content/Espeto",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "Espeto\\wwwroot",
       "Source": "Espeto",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\cliente\\clientes.css",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\cliente\\clientes.css",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "cliente/clientes.css",
       "AssetKind": "All",
@@ -36,10 +36,10 @@
       "OriginalItemSpec": "wwwroot\\cliente\\clientes.css"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\cliente\\clientes.html",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\cliente\\clientes.html",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "cliente/clientes.html",
       "AssetKind": "All",
@@ -55,10 +55,10 @@
       "OriginalItemSpec": "wwwroot\\cliente\\clientes.html"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\cliente\\clientes.js",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\cliente\\clientes.js",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "cliente/clientes.js",
       "AssetKind": "All",
@@ -74,10 +74,10 @@
       "OriginalItemSpec": "wwwroot\\cliente\\clientes.js"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\comanda\\index.html",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\comanda\\index.html",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "comanda/index.html",
       "AssetKind": "All",
@@ -93,10 +93,10 @@
       "OriginalItemSpec": "wwwroot\\comanda\\index.html"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\comanda\\script.js",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\comanda\\script.js",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "comanda/script.js",
       "AssetKind": "All",
@@ -112,10 +112,10 @@
       "OriginalItemSpec": "wwwroot\\comanda\\script.js"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\comanda\\style.css",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\comanda\\style.css",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "comanda/style.css",
       "AssetKind": "All",
@@ -131,10 +131,10 @@
       "OriginalItemSpec": "wwwroot\\comanda\\style.css"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\contabilidade\\cont.css",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\contabilidade\\cont.css",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "contabilidade/cont.css",
       "AssetKind": "All",
@@ -150,10 +150,10 @@
       "OriginalItemSpec": "wwwroot\\contabilidade\\cont.css"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\contabilidade\\cont.html",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\contabilidade\\cont.html",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "contabilidade/cont.html",
       "AssetKind": "All",
@@ -169,10 +169,10 @@
       "OriginalItemSpec": "wwwroot\\contabilidade\\cont.html"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\contabilidade\\cont.js",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\contabilidade\\cont.js",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "contabilidade/cont.js",
       "AssetKind": "All",
@@ -188,10 +188,10 @@
       "OriginalItemSpec": "wwwroot\\contabilidade\\cont.js"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\financeiro\\fin.css",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\financeiro\\fin.css",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "financeiro/fin.css",
       "AssetKind": "All",
@@ -207,10 +207,10 @@
       "OriginalItemSpec": "wwwroot\\financeiro\\fin.css"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\financeiro\\fin.html",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\financeiro\\fin.html",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "financeiro/fin.html",
       "AssetKind": "All",
@@ -226,10 +226,10 @@
       "OriginalItemSpec": "wwwroot\\financeiro\\fin.html"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\financeiro\\fin.js",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\financeiro\\fin.js",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "financeiro/fin.js",
       "AssetKind": "All",
@@ -245,10 +245,10 @@
       "OriginalItemSpec": "wwwroot\\financeiro\\fin.js"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\home\\home.css",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\home\\home.css",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "home/home.css",
       "AssetKind": "All",
@@ -264,10 +264,10 @@
       "OriginalItemSpec": "wwwroot\\home\\home.css"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\home\\home.html",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\home\\home.html",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "home/home.html",
       "AssetKind": "All",
@@ -283,10 +283,10 @@
       "OriginalItemSpec": "wwwroot\\home\\home.html"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\home\\home.js",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\home\\home.js",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "home/home.js",
       "AssetKind": "All",
@@ -302,10 +302,10 @@
       "OriginalItemSpec": "wwwroot\\home\\home.js"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\produto\\produtos.css",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\produto\\produtos.css",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "produto/produtos.css",
       "AssetKind": "All",
@@ -321,10 +321,10 @@
       "OriginalItemSpec": "wwwroot\\produto\\produtos.css"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\produto\\produtos.html",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\produto\\produtos.html",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "produto/produtos.html",
       "AssetKind": "All",
@@ -340,10 +340,10 @@
       "OriginalItemSpec": "wwwroot\\produto\\produtos.html"
     },
     {
-      "Identity": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\produto\\produtos.js",
+      "Identity": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\produto\\produtos.js",
       "SourceId": "Espeto",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\wwwroot\\",
       "BasePath": "_content/Espeto",
       "RelativePath": "produto/produtos.js",
       "AssetKind": "All",

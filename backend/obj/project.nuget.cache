@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "1LNqEOTr4LE=",
+  "dgSpecHash": "xH54Rrk9ESU=",
   "success": true,
-  "projectFilePath": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\Espeto.csproj",
+  "projectFilePath": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\Espeto.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\nycol\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\nycol\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.21\\microsoft.aspnetcore.openapi.8.0.21.nupkg.sha512",

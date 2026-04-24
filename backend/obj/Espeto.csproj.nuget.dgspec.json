@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\Espeto.csproj": {}
+    "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\Espeto.csproj": {}
   },
   "projects": {
-    "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\Espeto.csproj": {
+    "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\Espeto.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\Espeto.csproj",
+        "projectUniqueName": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\Espeto.csproj",
         "projectName": "Espeto",
-        "projectPath": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\Espeto.csproj",
+        "projectPath": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\Espeto.csproj",
         "packagesPath": "C:\\Users\\nycol\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\nycol\\Desktop\\Espeto\\backend\\obj\\",
+        "outputPath": "C:\\Users\\nycol\\Desktop\\TECH\\Espeto\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\nycol\\AppData\\Roaming\\NuGet\\NuGet.Config"
